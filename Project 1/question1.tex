@@ -1,0 +1,95 @@
+\documentclass[12pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+\title{STA 2503/MMF 1928 Project 1 - American Options}
+\author{Zixun Zhai, Siyu Jia, Dixin Mou}
+\date{2022/10/01}
+
+\begin{document}
+\begin{titlepage}
+  \begin{center}
+      \vspace*{7cm}
+
+      \textbf{STA 2503/MMF 1928 Project 1 - American Options}
+
+      % \vspace{0.5cm}
+      %  Thesis Subtitle
+           
+      \vspace{1.5cm}
+
+      \textbf{Zixun Zhai, Siyu Jia, Dixin Mou}
+
+      \vfill
+           
+      % A thesis presented for the degree of\\
+      % Doctor of Philosophy
+           
+      \vspace{0.8cm}
+           
+      % Department Name\\
+      University of Toronto\\
+      Toronto, Ontario, Canada\\
+      October $1^{st}$, 2022 
+           
+  \end{center}
+\end{titlepage}
+
+
+
+\part*{Question 1}
+\begin{proof}
+We start the proof by considering \[X^{(N)} = \log(\frac{S_T}{S_0}) = \sum_{n=1}^N (r\Delta t+\sigma \sqrt[]{\Delta t} \epsilon_n)\]
+The m.g.f of $X^{(N)}$ is: \\
+% \begin{equation}
+% \begin{split}
+\begin{align*}
+  \mathbb{E}^\mathbb{P}[e^{\mu X^{(N)}}] & =  \mathbb{E}^\mathbb{P}[e^{\sum_{n=1}^N (\mu r\Delta t+\mu\sigma \sqrt[]{\Delta t} \epsilon_n)}] \\
+  & = \mathbb{E}^\mathbb{P} [\prod_{n=1}^N e^{\mu r\Delta t+\mu\sigma \sqrt[]{\Delta t} \epsilon_n}] \\
+  & = (\mathbb{E}^\mathbb{P} [e^{\mu r\Delta t+\mu\sigma \sqrt[]{\Delta t} \epsilon_n}])^N \tag*{as $\epsilon_n$ is i.i.d}
+\end{align*}
+% \end{split} 
+% \end{equation}
+We then investigate the inner term $\mathbb{E}^\mathbb{P} [e^{\mu r\Delta t+\mu\sigma \sqrt[]{\Delta t} \epsilon_n}]$:
+\begin{align*}
+  \mathbb{E}^\mathbb{P} [e^{\mu r\Delta t+\mu\sigma \sqrt{\Delta t} \epsilon_n}] &= e^{\mu r\Delta t +\mu\sigma \sqrt{\Delta t}} \cdot \frac{1}{2} (1 + \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) \\ 
+    & \quad + e^{\mu r\Delta t-\mu\sigma \sqrt[]{\Delta t}} \cdot \frac{1}{2} (1 - \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) \\
+    &= [1+\mu r\Delta t+\mu \sigma \sqrt{\Delta t} +\frac{1}{2}\mu^2\sigma^2\Delta t + o(\Delta t)] \cdot \frac{1}{2} (1 + \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) \\ 
+    & \quad + [1+\mu r\Delta t-\mu \sigma \sqrt{\Delta t} +\frac{1}{2}\mu^2\sigma^2\Delta t + o(\Delta t)] \cdot \frac{1}{2} (1 - \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) 
+\end{align*}
+
+Note that we collect all the terms containing $\Delta t$ with order 2 or higher to be $o(\Delta t)$ because as $N\rightarrow \infty$ 
+and $\Delta t \rightarrow 0$, $o(\Delta t)$ will converge to 0 faster than $\Delta t$ or $\Delta t$ with lower orders.
+\\ \\ 
+We then continue the algebra manipulation:
+\begin{align*}
+  \mathbb{E}^\mathbb{P} [e^{\mu r\Delta t+\mu\sigma \sqrt{\Delta t} \epsilon_n}] &= [1+\mu r\Delta t+\mu \sigma \sqrt{\Delta t} +\frac{1}{2}\mu^2\sigma^2\Delta t + o(\Delta t)] \cdot \frac{1}{2} (1 + \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) \\ 
+    & \quad + [1+\mu r\Delta t-\mu \sigma \sqrt{\Delta t} +\frac{1}{2}\mu^2\sigma^2\Delta t + o(\Delta t)] \cdot \frac{1}{2} (1 - \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) \\
+    &= \frac{1}{2}[ 1 + \frac{(\mu - r) - \frac{1}{2}\sigma^2}{\sigma}\sqrt{\Delta t} + \mu r \Delta t + \mu \sigma \sqrt{\Delta t} \\
+    & \quad + \mu((\mu -r) - \frac{1}{2}\sigma^2)\Delta t + \frac{1}{2}\mu^2 \sigma^2 \Delta t \\
+    & \quad + 1 - \frac{(\mu - r) - \frac{1}{2}\sigma^2}{\sigma}\sqrt{\Delta t} + \mu r \Delta t - \mu \sigma \sqrt{\Delta t} \\
+    & \quad + \mu((\mu -r) - \frac{1}{2}\sigma^2)\Delta t + \frac{1}{2}\mu^2 \sigma^2 \Delta t + o(\Delta t)] \\
+    &= 1 + \mu r \Delta t + \mu((\mu - r) - \frac{1}{2}\sigma^2)\Delta t + \frac{1}{2}\mu^2 \sigma^2 \Delta t + o(\Delta t) \\
+    &= 1 + (\mu r + \mu^2 - \mu r -\frac{1}{2}\mu \sigma^2 + \frac{1}{2}\mu^2 \sigma^2)\Delta t + o(\Delta t) \\
+    &= 1 + (\mu (\mu - \frac{1}{2}\sigma^2) + \frac{1}{2}\mu^2 \sigma^2)\Delta t + o(\Delta t)\\
+    &= e^{(\mu (\mu - \frac{1}{2}\sigma^2) + \frac{1}{2}\mu^2 \sigma^2)\Delta t} + o(\Delta t)
+\end{align*} 
+As a result:
+\begin{align*}
+  \mathbb{E}^\mathbb{P}[e^{\mu X^{(N)}}] & = (e^{(\mu (\mu - \frac{1}{2}\sigma^2) + \frac{1}{2}\mu^2 \sigma^2)\Delta t} + o(\Delta t))^N\\
+    &=  e^{(\mu (\mu - \frac{1}{2}\sigma^2)T + \frac{1}{2}\mu^2 \sigma^2T)} \tag*{as $N \rightarrow \infty$ and $\Delta t = \frac{T}{N}$}
+\end{align*}
+We notice that the m.g.f of the $X^{(N)}$ is equal to the m.g.f of a random variable $Y$ whcih follows the normal distribution with mean to be $(\mu - \frac{1}{2}\sigma^2)T$ and
+variance to be $\sigma^2 T$.
+\\ \\
+Thus, we prove that:
+\[X^{(N)} \xrightarrow[N \rightarrow \inf]{d} (\mu - \frac{1}{2}\sigma^2)T + \sigma^2 TZ\]
+where 
+\[Z \stackrel{\mathbb{P}}{\sim} \mathcal{N}(0, 1)\] 
+\end{proof}
+
+\end{document}

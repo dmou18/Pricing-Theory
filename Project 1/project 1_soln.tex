@@ -5,9 +5,10 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{tikz}
 
 \title{STA 2503/MMF 1928 Project 1 - American Options}
-\author{Zixun Zhai, Siyu Jia, Dixin Mou}
+\author{Siyu Jia, Dixin Mou, Zixun Zhai}
 \date{2022/10/01}
 
 \begin{document}
@@ -22,7 +23,7 @@
            
       \vspace{1.5cm}
 
-      \textbf{Zixun Zhai, Siyu Jia, Dixin Mou}
+      \textbf{Siyu Jia, Dixin Mou, Zixun Zhai}
 
       \vfill
            
@@ -38,7 +39,6 @@
            
   \end{center}
 \end{titlepage}
-
 
 
 \part*{Question 1}
@@ -61,7 +61,6 @@ We then investigate the inner term $\mathbb{E}^\mathbb{P} [e^{\mu r\Delta t+\mu\
     &= [1+\mu r\Delta t+\mu \sigma \sqrt{\Delta t} +\frac{1}{2}\mu^2\sigma^2\Delta t + o(\Delta t)] \cdot \frac{1}{2} (1 + \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) \\ 
     & \quad + [1+\mu r\Delta t-\mu \sigma \sqrt{\Delta t} +\frac{1}{2}\mu^2\sigma^2\Delta t + o(\Delta t)] \cdot \frac{1}{2} (1 - \frac{(\mu -r) - \frac{1}{2}\sigma^2}{\sigma} \sqrt{\Delta t}) 
 \end{align*}
-
 Note that we collect all the terms containing $\Delta t$ with order 2 or higher to be $o(\Delta t)$ because as $N\rightarrow \infty$ 
 and $\Delta t \rightarrow 0$, $o(\Delta t)$ will converge to 0 faster than $\Delta t$ or $\Delta t$ with lower orders.
 \\ \\ 
@@ -91,5 +90,63 @@ Thus, we prove that:
 where 
 \[Z \stackrel{\mathbb{P}}{\sim} \mathcal{N}(0, 1)\] 
 \end{proof}
+
+\part*{Question 2}
+\section*{Part 1}
+We firstly find the martingale measure $\mathbb{Q}(\epsilon_k = \pm 1)$ where $\mathbb{Q}(\epsilon_k =1) = q$ and $\mathbb{Q}(\epsilon_k =-1) = 1-q$. Consider 
+time $t_k$ and $t_{k_1}$, we have the following for $B$ and $S$. \\ \\ 
+\begin{tikzpicture}[level distance=30mm,sibling distance=40mm,every node/.style={fill=blue!30,circle,inner sep=5pt}, scale = 0.9]
+  \node {$B_{t_k} = e^{rt_k}$}
+  child[grow=right] {
+  child {node{$e^{rt_{k+1}} = e^{r(t_k + \Delta t)}$}} child {node{$e^{rt_{k+1}} = e^{r(t_k + \Delta t)}$}}
+  };
+\end{tikzpicture}
+\\
+\begin{tikzpicture}[level distance=30mm,sibling distance=43mm,every node/.style={fill=blue!30,circle,inner sep=5pt}]
+  \node {$S_{t_k}$}
+  child[grow=right] {
+  child {node{$S_{t_k}e^{rt_k-\sigma \sqrt{\Delta t}}$}} child {node{$S_{t_k}e^{rt_k+\sigma \sqrt{\Delta t}}$}}
+  };
+\end{tikzpicture}\\
+We construct the following $\mathbb{Q}$-martingale:
+\begin{align*}
+&\qquad \frac{S_{t_k}}{e^{rt_k}} = q\frac{S_{t_k}e^{r\Delta t + \sigma \sqrt{\Delta t}}}{e^{r(t_k+\Delta t)}} + (1-q)\frac{S_{t_k}e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r(t_k+\Delta t)}}\\
+&\Rightarrow 1 = q\frac{e^{r\Delta t + \sigma \sqrt{\Delta t}}}{e^{r\Delta t}} + (1-q) \frac{e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r\Delta t}} \\
+&\Rightarrow q(e^{r\Delta t + \sigma \sqrt{\Delta t}} - e^{r\Delta t - \sigma \sqrt{\Delta t}}) = e^{r\Delta t} - e^{r\Delta t - \sigma \sqrt{\Delta t}} \\
+&\Rightarrow q = \frac{e^{r\Delta t} - e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r\Delta t + \sigma \sqrt{\Delta t}} - e^{r\Delta t - \sigma \sqrt{\Delta t}}}
+\end{align*} 
+\\
+We then Taylor-expand the exponential terms and collect all all the terms containing $\Delta t$ with order 2 or higher to be $o(\Delta t)$:
+\begin{align*}
+  q &= \frac{e^{r\Delta t} - e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r\Delta t + \sigma \sqrt{\Delta t}} - e^{r\Delta t - \sigma \sqrt{\Delta t}}}\\
+  &= \frac{1+r\Delta t - (1 + r \Delta t - \sigma \sqrt{\Delta t} + \frac{1}{2} \sigma^2\Delta t) + o(\Delta t)}
+    {1+r\Delta t + \sigma \sqrt{\Delta t} + \frac{1}{2} \sigma^2\Delta t - (1 + r \Delta t - \sigma \sqrt{\Delta t} + \frac{1}{2} \sigma^2\Delta t) + o(\Delta t)} \\
+  &= \frac{\sigma \sqrt{\Delta t} - \frac{1}{2} \sigma^2\Delta t + o(\Delta t)}{2\sigma\sqrt{\Delta t} + o(\Delta t)}\\
+  &= \frac{1}{2} - \frac{1}{4}\sigma\sqrt{\Delta t} + o(\sqrt{\Delta t}) \\
+  &= \frac{1}{2}(1 - \frac{1}{2}\sigma\sqrt{\Delta t}) + o(\sqrt{\Delta t})
+\end{align*}
+
+\newpage
+\section*{Part 2}
+Similarly, we want to find the martingale measure $\mathbb{Q}^S(\epsilon_k = \pm 1)$ where $\mathbb{Q}^S(\epsilon_k =1) = h$ and $\mathbb{Q}^S(\epsilon_k =-1) = 1-h$. Consider 
+time $t_k$ and $t_{k_1}$, this time we use $S$ as the numeraire. \\ \\
+We construct the following $\mathbb{Q}^S$-martingale:
+\begin{align*}
+  &\qquad \frac{e^{rt_k}}{S_{t_k}} = h\frac{e^{r(t_k+\Delta t)}}{S_{t_k}e^{r\Delta t + \sigma \sqrt{\Delta t}}} + (1-h)\frac{e^{r(t_k+\Delta t)}}{S_{t_k}e^{r\Delta t - \sigma \sqrt{\Delta t}}}\\
+  &\Rightarrow  1 = h\frac{e^{r\Delta t}}{e^{r\Delta t + \sigma \sqrt{\Delta t}}} + (1-h) \frac{e^{r\Delta t}}{e^{r\Delta t - \sigma \sqrt{\Delta t}}} \\
+  &\Rightarrow e^{2r\Delta t} = he^{2r\Delta t - \sigma \sqrt{\Delta t}} + (1-h)e^{2r\Delta t + \sigma \sqrt{\Delta t}}\\
+  &\Rightarrow e^{2r\Delta t} - e^{2r\Delta t + \sigma \sqrt{\Delta t}} = h(e^{2r\Delta t - \sigma \sqrt{\Delta t}} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}) \\
+  &\Rightarrow h = \frac{e^{2r\Delta t} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}}{e^{2r\Delta t - \sigma \sqrt{\Delta t}} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}}
+\end{align*}
+We then Taylor-expand the exponential terms and collect all all the terms containing $\Delta t$ with order 2 or higher to be $o(\Delta t)$:
+\begin{align*}
+  h &= \frac{e^{2r\Delta t} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}}{e^{2r\Delta t - \sigma \sqrt{\Delta t}} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}} \\
+    &= \frac{1+2r\Delta t - (1+2r\Delta t+\sigma \sqrt{\Delta t} + \frac{1}{2} \sigma^2\Delta t) + o(\Delta t)}
+        {1+2r\Delta t - \sigma \sqrt{\Delta t} + \frac{1}{2} \sigma^2\Delta t - (1+2r\Delta t+\sigma \sqrt{\Delta t} + \frac{1}{2} \sigma^2\Delta t) + o(\Delta t)}\\
+    &= \frac{-\sigma \sqrt{\Delta t} - \frac{1}{2} \sigma^2\Delta t+ o(\Delta t)}{-2\sigma \sqrt{\Delta t} +o(\Delta t)}\\
+    &= \frac{\sigma \sqrt{\Delta t} + \frac{1}{2} \sigma^2\Delta t+ o(\Delta t)}{2\sigma \sqrt{\Delta t} +o(\Delta t)}\\
+    &= \frac{1}{2}(1+\frac{1}{2}\sigma \sqrt{\Delta t}) + o(\sqrt{\Delta t})
+\end{align*}
+
 
 \end{document}

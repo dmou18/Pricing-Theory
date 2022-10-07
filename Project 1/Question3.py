@@ -59,9 +59,9 @@ def CRROptionWGreeks(currStockPrice, strikePrice, intRate, mu, vol, totSteps, ye
     inds = np.triu_indices(len(strategyTree))
     strategyTree[inds] = 0
     strategyTree[:, -1] = np.where(optionValueTree[:,-1] > 0, 1, 0) 
-  else :
+  else:
     strategyTree[:,-1] = np.where(optionValueTree[:,-1] > 0, 1, 0) 
-
+  
   oneStepDiscount = np.exp(-intRate * timeStep)  # discount rate for one step
 
   # Now we step backwards to calculate the probability weighted option value at every previous node
@@ -77,12 +77,19 @@ def CRROptionWGreeks(currStockPrice, strikePrice, intRate, mu, vol, totSteps, ye
     #if the option is american then you can convert at anytime, so the option value can never be less than the intrinsic value
     if american:
       if optionType == "CALL":
-        optionValueTree[0:ii, ii] = np.maximum(priceTree[0:ii, ii] - strikePrice, optionValueTree[0:ii, ii])
-        strategyTree[0:ii, ii] = np.where(((priceTree[0:ii, ii] - strikePrice) - optionValueTree[0:ii, ii]) >= 0, 1, 0)
+        strategyTree[0:ii+1, ii] = np.where((priceTree[0:ii+1, ii] - strikePrice) >= optionValueTree[0:ii+1, ii], 1, 0)
+        optionValueTree[0:ii+1, ii] = np.maximum(priceTree[0:ii+1, ii] - strikePrice, optionValueTree[0:ii+1, ii])
       else:
-        optionValueTree[0:ii, ii] = np.maximum(strikePrice - priceTree[0:ii, ii], optionValueTree[0:ii, ii])
-        strategyTree[0:ii, ii] = np.where((optionValueTree[0:ii, ii] - (priceTree[0:ii, ii] - strikePrice))  >= 0, 1, 0)
-
+        strategyTree[0:ii+1, ii] = np.where((strikePrice - priceTree[0:ii+1, ii]) >= optionValueTree[0:ii+1, ii], 1, 0)
+        optionValueTree[0:ii+1, ii] = np.maximum(strikePrice - priceTree[0:ii+1, ii], optionValueTree[0:ii+1, ii])
+  
+  if american:
+    if optionType == "CALL":
+      strategyTree[0,0] = 1 if (priceTree[0,0] - strikePrice) >= optionValueTree[0, 0] else 0
+    else:
+      strategyTree[0,0] = 1 if (strikePrice - priceTree[0, 0]) >= optionValueTree[0,0] else 0
+     
+       
   # After all that, the current price of the option will be in the first element of the optionValueTree
   optionPrice = optionValueTree[0, 0]
 
@@ -91,7 +98,7 @@ def CRROptionWGreeks(currStockPrice, strikePrice, intRate, mu, vol, totSteps, ye
 
 if __name__ == "__main__":
   try:
-    crr = CRROptionWGreeks(10, 10, 0.02, 0.05, 0.2, 500, 1, "PUT", True)
+    crr = CRROptionWGreeks(10, 10, 0.02, 0.05, 0.2, 10, 1, "PUT", False)
   except ValueError as e:
     print("Type error: " + str(e))
   except Exception as e:

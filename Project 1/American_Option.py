@@ -5,6 +5,7 @@ Created on Tue Oct  4 21:47:06 2022
 @author: zhaiz
 @editor: Dixin Mou
 """
+from cmath import nan
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,12 +13,12 @@ import matplotlib.pyplot as plt
 # Code for Q3 a
 def PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp):
     timeStep = yearsToExp / totSteps
-    u = np.exp(intRate * timeStep + vol * np.sqrt(timeStep))
+    u = np.exp(vol * np.sqrt(timeStep))
     # one step random walk (price decreases)
-    d = np.exp(intRate * timeStep - vol * np.sqrt(timeStep))
+    d = np.exp(- vol * np.sqrt(timeStep))
     
     # risk neutral probability of an up move
-    pu = (np.exp(intRate * timeStep) -d)/(u-d)
+    pu = (1 -d)/(u-d)
     # risk neutral probability of a down move
     pd = 1 - pu
     
@@ -51,7 +52,7 @@ def PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yea
 
 
 # Q3 Part(a) Generate the exercise boundary as a function of t
-def PlotExerciseBoundary(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, plot = False):
+def exerciseBoundary(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, plot = False):
     timeStep = yearsToExp / totSteps
     TimeVector = np.arange(0, yearsToExp+timeStep, timeStep)
     payoff, optionValueTree, priceTree, intrinsicTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
@@ -73,20 +74,65 @@ def PlotExerciseBoundary(currStockPrice, strikePrice, intRate, mu, vol, totSteps
         plt.show()
     return TimeVector, boundary
     
-    
+
 # Q3 Part(a) ii: hedging strategy
-def hedge_node(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp):
+def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp):
     timeStep = yearsToExp/totSteps
     payoff, optionValueTree, priceTree, intrinsicTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
-    u = np.exp(intRate * timeStep + vol*np.sqrt(timeStep))
-    d = np.exp(intRate * timeStep-vol*np.sqrt(timeStep))
-    times = np.arange(0, 1.1, 0.25)
-    portfolio = np.full((totSteps+1, totSteps+1, 2), np.nan)
-    for t in times:
-    pass
+    u = np.exp(intRate * timeStep + vol * np.sqrt(timeStep))
+    d = np.exp(intRate * timeStep - vol * np.sqrt(timeStep))
+    alphas = np.full((totSteps, 5), np.nan)
+    betas = np.full((totSteps, 5), np.nan)
+    stocks = np.full((totSteps, 5),np.nan)
+    
+    for i in range(4):
+        ind = int(totSteps * i * 0.25)
+        Cu = optionValueTree[0:ind+1, ind+1]
+        Cd = optionValueTree[1:ind+2, ind+1]
+        S = priceTree[0:ind+1, ind]
+        alpha = (Cu-Cd)/(S*(u-d))
+        beta = (Cu - alpha*S*u)/np.exp(intRate * timeStep * (ind+1))
+        
+        alphas[0:ind + 1,i] = alpha
+        betas[0:ind + 1,i] = beta
+        stocks[0 : ind + 1, i] = S
+         
+    inds = np.argwhere(stocks <= 10)
+    portfolio_0 = []
+    portfolio_1 = []
+    portfolio_2 = []
+    portfolio_3 = []
+    
+    for i in inds:
+        x = i[0]
+        y = i[1]
+        if y == 0:
+            portfolio_0.append([stocks[x,y], alphas[x,y], betas[x,y]])
+        elif y == 1:
+            portfolio_1.append([stocks[x,y], alphas[x,y], betas[x,y]])
+        elif y == 2:
+            portfolio_2.append([stocks[x,y], alphas[x,y], betas[x,y]])
+        elif y == 3:
+            portfolio_3.append([stocks[x,y], alphas[x,y], betas[x,y]])
+            
+    portfolio_0 = np.reshape(portfolio_0, (-1,3))
+    portfolio_1 = np.reshape(portfolio_1, (-1,3))
+    portfolio_2 = np.reshape(portfolio_2, (-1,3))
+    portfolio_3 = np.reshape(portfolio_3, (-1,3))
+    
+    plt.plot(portfolio_0[:, 0], portfolio_0[:, 1], alpha=1, linewidth=2, label=r'$t = 0$')
+    plt.plot(portfolio_1[:, 0], portfolio_1[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
+    plt.plot(portfolio_2[:, 0], portfolio_2[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
+    plt.plot(portfolio_3[:, 0], portfolio_3[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
+ #   plt.plot(portfolio_0[4], alphas[4], alpha=1, linewidth=2, label=r'$t = 1$')
+    
+    plt.title("Hedging Portfolio")
+    plt.xlabel("Stock Price")
+    plt.ylabel(r'$\alpha$')
+    plt.legend()
+    plt.show()
     
     
-
-
 if __name__ == "__main__":
-    PlotExerciseBoundary(10, 10, 0.02, 0.05, 0.2, 5000, 1, plot)
+    # exerciseBoundary(10, 10, 0.02, 0.05, 0.2, 5000, 1, True)
+    hedgePortfolio(10, 10, 0.02, 0.05, 0.2, 5000, 1)

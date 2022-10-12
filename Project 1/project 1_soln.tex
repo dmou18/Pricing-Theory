@@ -111,7 +111,8 @@ We construct the following $\mathbb{Q}$-martingale:
 &\qquad \frac{S_{t_k}}{e^{rt_k}} = q_k\frac{S_{t_k}e^{r\Delta t + \sigma \sqrt{\Delta t}}}{e^{r(t_k+\Delta t)}} + (1-q_k)\frac{S_{t_k}e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r(t_k+\Delta t)}}\\
 &\Rightarrow 1 = q_k\frac{e^{r\Delta t + \sigma \sqrt{\Delta t}}}{e^{r\Delta t}} + (1-q_k) \frac{e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r\Delta t}} \\
 &\Rightarrow q_k(e^{r\Delta t + \sigma \sqrt{\Delta t}} - e^{r\Delta t - \sigma \sqrt{\Delta t}}) = e^{r\Delta t} - e^{r\Delta t - \sigma \sqrt{\Delta t}} \\
-&\Rightarrow q_k = q = \frac{e^{r\Delta t} - e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r\Delta t + \sigma \sqrt{\Delta t}} - e^{r\Delta t - \sigma \sqrt{\Delta t}}} \tag*{As $q_k$ does not depend on $k$}
+&\Rightarrow q_k = q = \frac{e^{r\Delta t} - e^{r\Delta t - \sigma \sqrt{\Delta t}}}{e^{r\Delta t + \sigma \sqrt{\Delta t}} - e^{r\Delta t - \sigma \sqrt{\Delta t}}} \tag*{As $q_k$ does not depend on $k$} \\
+& \Rightarrow q = \frac{1-e^{ - \sigma \sqrt{\Delta t}}}{e^{  \sigma \sqrt{\Delta t}}-e^{ - \sigma \sqrt{\Delta t}}}
 \end{align*} 
 \\
 We then Taylor-expand the exponential terms and collect all all the terms containing $\Delta t$ with order 2 or higher to be $o(\Delta t)$:
@@ -166,7 +167,8 @@ We construct the following $\mathbb{Q}^S$-martingale:
   &\Rightarrow  1 = h_k\frac{e^{r\Delta t}}{e^{r\Delta t + \sigma \sqrt{\Delta t}}} + (1-h_k) \frac{e^{r\Delta t}}{e^{r\Delta t - \sigma \sqrt{\Delta t}}} \\
   &\Rightarrow e^{2r\Delta t} = h_ke^{2r\Delta t - \sigma \sqrt{\Delta t}} + (1-h_k)e^{2r\Delta t + \sigma \sqrt{\Delta t}}\\
   &\Rightarrow e^{2r\Delta t} - e^{2r\Delta t + \sigma \sqrt{\Delta t}} = h_k(e^{2r\Delta t - \sigma \sqrt{\Delta t}} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}) \\
-  &\Rightarrow h_k = h = \frac{e^{2r\Delta t} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}}{e^{2r\Delta t - \sigma \sqrt{\Delta t}} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}} \tag*{As $h_k$ does not depend on $k$}
+  &\Rightarrow h_k = h = \frac{e^{2r\Delta t} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}}{e^{2r\Delta t - \sigma \sqrt{\Delta t}} - e^{2r\Delta t + \sigma \sqrt{\Delta t}}} \tag*{As $h_k$ does not depend on $k$} \\
+  & \Rightarrow h = \frac{1-e^{\sigma \sqrt{\Delta t}}}{e^{-\sigma \sqrt{\Delta t}}-e^{\sigma \sqrt{\Delta t}}}
 \end{align*}
 We then Taylor-expand the exponential terms and collect all all the terms containing $\Delta t$ with order 2 or higher to be $o(\Delta t)$:
 \begin{align*}

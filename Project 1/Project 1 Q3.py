@@ -146,11 +146,11 @@ def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, years
     optionPrice = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[1][0,0]
     intrinsicValue = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[3]
     for i in range(0, totSteps+1):
-        # Select the time at which we want to exercise the option, compare with the early exercise boundary
+        # Select the time at which we want to exercise the option, hit the early exercise boundary
         # Calculate the profit and loss: PV(payoff) - option price at t = 0 
-        payoffTree[:,i] = np.where(PriceTree[:,i] < boundary[i],
+        payoffTree[:,i] = np.where(PriceTree[:,i] <= boundary[i],
                                    (- PriceTree[:,i] + strikePrice)*np.exp(-intRate * i*timeStep) - optionPrice, -optionPrice) 
-        exercise_t[:,i] = np.where(PriceTree[:,i] < boundary[i], i, 0) 
+        exercise_t[:,i] = np.where(PriceTree[:,i] <= boundary[i], i, 0) 
         # Find the first exercise price in each path
         if i !=0:
             payoffTree[:,i] = np.where(payoffTree[:,i-1] != -optionPrice,payoffTree[:,i-1],payoffTree[:,i])

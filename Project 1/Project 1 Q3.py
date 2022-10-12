@@ -188,13 +188,13 @@ plt.show()
 
 # Generate the kernel density estimate
 sns.set_style('whitegrid')
-sns.kdeplot(np.array(PL[:,0]), bw=0.5)
+sns.kdeplot(np.array(PL[:,0]), bw=0.05)
 plt.show()
 
 # Generate the exercise distribution of function t 
 exercise_time = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000)[4]
 sns.set_style('whitegrid')
-sns.kdeplot(np.array(exercise_time[:,0]), bw=0.5)
+sns.kdeplot(np.array(exercise_time[:,0]), bw=0.05)
 plt.show()
 # fig = plt.figure()
 # fig.suptitle("Stock Simulation")

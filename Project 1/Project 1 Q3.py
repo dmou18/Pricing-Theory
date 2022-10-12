@@ -192,9 +192,10 @@ sns.kdeplot(np.array(PL[:,0]), bw=0.5)
 plt.show()
 
 # Generate the exercise distribution of function t 
-# !!! need to be fixed
-exercise_time = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[4]
-plt.plot(exercise_time)
+exercise_time = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000)[4]
+sns.set_style('whitegrid')
+sns.kdeplot(np.array(exercise_time[:,0]), bw=0.5)
+plt.show()
 # fig = plt.figure()
 # fig.suptitle("Stock Simulation")
 # plt.plot(TimeVector,price)

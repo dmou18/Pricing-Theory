@@ -163,7 +163,7 @@ def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, years
         index2 = np.where(exercise_t[ii,:] != 0)
         if np.array(index).size == 0:
             PL[ii] = -optionPrice
-            ex_t[ii] = 0
+            ex_t[ii] = 1
         else:
             PL[ii] = payoffTree[ii, index[0][0]]
             ex_t[ii] = exercise_t[ii, index[0][0]] * timeStep

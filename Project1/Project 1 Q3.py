@@ -107,11 +107,9 @@ plt.show()
 
 
 # Q3 Part(b) i:
-import random as rd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 
 def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, simulationStep, boundary):
     timeStep = yearsToExp/totSteps
@@ -138,8 +136,8 @@ def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, years
         OptionValueTree[:,j] = np.maximum(strikePrice - PriceTree[:,j],0)
         
     # Algorithm: Select the time at which we exercise the put option and calculate its present value
-    optionPrice = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[0][0,0]
-    intrinsicValue = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[1]
+    optionPrice = PutOption(10, 10, 0.02, 0.05, 0.2, 500, 1)[0][0,0]
+    intrinsicValue = PutOption(10, 10, 0.02, 0.05, 0.2, 500, 1)[1]
     for i in range(0, totSteps+1):
         # Select the time at which we want to exercise the option, compare with the early exercise boundary
         # Calculate the profit and loss: PV(payoff) - option price at t = 0 
@@ -167,11 +165,11 @@ def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, years
     
     return PriceTree, OptionValueTree, payoffTree, PL, ex_t
 
-price = np.transpose(Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[0])
-OptionValue = np.transpose(Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[1])
-payoff = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[2]
+price = np.transpose(Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000, boundary)[0])
+OptionValue = np.transpose(Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000, boundary)[1])
+payoff = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000, boundary)[2]
 TimeVector = np.arange(0, 1+1/5000, 1/5000)
-PL = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[3]
+PL = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000, boundary)[3]
 # Simulate 10000 sample paths of the asset
 fig = plt.figure()
 fig.suptitle("Stock Simulation")
@@ -192,34 +190,34 @@ plt.show()
 # Generate the exercise distribution of function t 
 fig = plt.figure()
 fig.suptitle('kernel density estimate of distribution of exercise time')
-exercise_time = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[4]
-sns.set_style('whitegrid')
+exercise_time = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000, boundary)[4]
 sns.kdeplot(np.array(exercise_time[:,0]), bw_method = 0.05)
 plt.xlabel('Time to Maturity')
 plt.show()
 
 # Q3 Part(b) ii:
-volatility = np.arange(0.1, 0.31, 0.05)  
+volatility = [0.1, 0.15, 0.2, 0.25, 0.3]
 # Compute the early exercise boundary whhen sigma = 20%
 early_bound = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[2]
 # Generate plots for multiple volatilities with respect to profit and loss
-profit_loss = np.full((10000, 1), np.nan) 
+data = np.full((10000, 1), np.nan) 
 fig = plt.figure()
-
 for ii in range(len(volatility)):
-    profit_loss = Putsimulation(10, 10, 0.02, 0.2, volatility[ii], 5000, 1, 10000, early_bound)[3]
-    sns.kdeplot(np.array(profit_loss[:,0]), bw_method = 0.05, label = str(volatility[ii]))
+    data = Putsimulation(10, 10, 0.02, 0.05, volatility[ii], 5000, 1, 10000, early_bound)[3]
+    sns.kdeplot(np.array(data[:,0]), bw_method = 0.05, label = 'vol =' + str(volatility[ii]))
     
 fig.suptitle('kernel density estimate of profit and loss')
+plt.legend()
 plt.show()
 # Generate plots for multiple volatilities in terms of exercise time
 fig = plt.figure()
 exercise_time = np.full((10000, 1), np.nan)
 for ii in range(len(volatility)):
-    profit_loss = Putsimulation(10, 10, 0.02, 0.2, volatility[ii], 5000, 1, 10000, early_bound)[4]
-    sns.kdeplot(np.array(profit_loss[:,0]), bw_method = 0.05, label = str(volatility[ii]))
+    data = Putsimulation(10, 10, 0.02, 0.05, volatility[ii], 5000, 1, 10000, early_bound)[4]
+    sns.kdeplot(np.array(data[:,0]), bw_method = 0.05, label = 'vol =' + str(volatility[ii]))
     
 fig.suptitle('kernel density estimate of exercise time')
+plt.legend()
 plt.show()
 
 

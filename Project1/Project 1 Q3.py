@@ -51,26 +51,22 @@ def PutOption(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToEx
     #Calculate the put option price for European style and American style    
     EuropValue = intrinsicTree[0,0]
     AmericanValue = optionValueTree[0,0]
+    # Calcualte the early exercise boundary
+    diff = np.subtract(payoff, intrinsicTree)
+    boundary = np.full((totSteps+1, 1), np.nan)
+    # Trying to figure out if there is a way to optimize
+    for j in range(0, totSteps+1):
+        for i in range(0,totSteps+1):
+            if diff[i,j] <= 0:
+                priceTree[i,j]=np.nan
+        boundary[j] = np.nanmax(priceTree[:,j])
                 
-    return payoff, optionValueTree, priceTree, intrinsicTree
+    return optionValueTree, intrinsicTree, boundary
 
-# Generate the 
+# Generate the output
 TimeVector = np.arange(0, 1+1/5000, 1/5000)
-payoff = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[0]
-optionValue = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[1]
-price = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[2]
-priceValue  = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[2]
-intrinsicValue = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[3]
-
-# Q3 Part(a) Generate the exercise boundary as a function of t
-diff = np.subtract(payoff, intrinsicValue)
-boundary = np.full((5001, 1), np.nan)
-# Trying to figure out if there is a way to optimize
-for j in range(0, 5001):
-    for i in range(0,5001):
-        if diff[i,j] <= 0:
-            priceValue[i,j]=np.nan
-    boundary[j] = np.nanmax(priceValue[:,j])
+optionValue = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[0]
+boundary = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[2]
 
 fig = plt.figure()
 fig.suptitle("Exercise Boundary for American Put Option")
@@ -83,30 +79,30 @@ plt.show()
 # Q3 Part(a) ii: hedging strategy
 
 # Q3 Part(a) iii: 
-volatility = np.arange(0,1,1/1000)
-vol = []
-p = []
-for i in volatility:
-    vol += [i]
-    p += [PutOption(10, 10, 0.02, 0.05, i, 5000, 1)[1][0,0]]    
-plt.plot(vol,p)
-plt.title("Calculated Price VS Volatility")
-plt.xlabel("Volatility")
-plt.ylabel("Price")
-plt.show()
-#plot risk-free vs price
-risk_free = np.arange(0,0.04,0.0005)
-r = []
-p = []
-for ii in risk_free:
-    r += [ii]
-    p += [PutOption(10, 10, ii, 0.05, 0.2, 5000, 1)[1][0,0]] 
+# volatility = np.arange(0,1,1/1000)
+# vol = []
+# p = []
+# for i in volatility:
+#     vol += [i]
+#     p += [PutOption(10, 10, 0.02, 0.05, i, 5000, 1)[1][0,0]]    
+# plt.plot(vol,p)
+# plt.title("Calculated Price VS Volatility")
+# plt.xlabel("Volatility")
+# plt.ylabel("Price")
+# plt.show()
+# #plot risk-free vs price
+# risk_free = np.arange(0,0.04,0.0005)
+# r = []
+# p = []
+# for ii in risk_free:
+#     r += [ii]
+#     p += [PutOption(10, 10, ii, 0.05, 0.2, 5000, 1)[1][0,0]] 
 
-plt.plot(r,p)
-plt.title("Calculated Price VS Risk-Free Rate")
-plt.xlabel("Risk-Free Rate")
-plt.ylabel("Price")
-plt.show() 
+# plt.plot(r,p)
+# plt.title("Calculated Price VS Risk-Free Rate")
+# plt.xlabel("Risk-Free Rate")
+# plt.ylabel("Price")
+# plt.show() 
 # Commentary
 
 
@@ -117,8 +113,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-
-def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, simulationStep):
+def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, simulationStep, boundary):
     timeStep = yearsToExp/totSteps
     u = np.exp(vol * np.sqrt(timeStep))
     d = np.exp(-vol * np.sqrt(timeStep))
@@ -143,14 +138,14 @@ def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, years
         OptionValueTree[:,j] = np.maximum(strikePrice - PriceTree[:,j],0)
         
     # Algorithm: Select the time at which we exercise the put option and calculate its present value
-    optionPrice = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[1][0,0]
-    intrinsicValue = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[3]
+    optionPrice = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[0][0,0]
+    intrinsicValue = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[1]
     for i in range(0, totSteps+1):
         # Select the time at which we want to exercise the option, compare with the early exercise boundary
         # Calculate the profit and loss: PV(payoff) - option price at t = 0 
-        payoffTree[:,i] = np.where(PriceTree[:,i] < boundary[i],
+        payoffTree[:,i] = np.where(PriceTree[:,i] <= boundary[i],
                                    (- PriceTree[:,i] + strikePrice)*np.exp(-intRate * i*timeStep) - optionPrice, -optionPrice) 
-        exercise_t[:,i] = np.where(PriceTree[:,i] < boundary[i], i, 0) 
+        exercise_t[:,i] = np.where(PriceTree[:,i] <= boundary[i], i, 0) 
         # Find the first exercise price in each path
         if i !=0:
             payoffTree[:,i] = np.where(payoffTree[:,i-1] != -optionPrice,payoffTree[:,i-1],payoffTree[:,i])
@@ -163,7 +158,7 @@ def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, years
         index2 = np.where(exercise_t[ii,:] != 0)
         if np.array(index).size == 0:
             PL[ii] = -optionPrice
-            ex_t[ii] = 0
+            ex_t[ii] = 1
         else:
             PL[ii] = payoffTree[ii, index[0][0]]
             ex_t[ii] = exercise_t[ii, index[0][0]] * timeStep
@@ -172,11 +167,11 @@ def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, years
     
     return PriceTree, OptionValueTree, payoffTree, PL, ex_t
 
-price = np.transpose(Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[0])
-OptionValue = np.transpose(Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[1])
-payoff = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[2]
+price = np.transpose(Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[0])
+OptionValue = np.transpose(Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[1])
+payoff = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[2]
 TimeVector = np.arange(0, 1+1/5000, 1/5000)
-PL = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[3]
+PL = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[3]
 # Simulate 10000 sample paths of the asset
 fig = plt.figure()
 fig.suptitle("Stock Simulation")
@@ -187,24 +182,44 @@ plt.show()
 
 
 # Generate the kernel density estimate
+fig = plt.figure()
+fig.suptitle('kernel density estimate of profit and loss')
 sns.set_style('whitegrid')
-sns.kdeplot(np.array(PL[:,0]), bw=0.5)
+sns.kdeplot(np.array(PL[:,0]),bw_method = 0.05)
+plt.xlabel('Profit and loss')
 plt.show()
 
 # Generate the exercise distribution of function t 
-# !!! need to be fixed
-exercise_time = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[4]
-plt.plot(exercise_time)
-# fig = plt.figure()
-# fig.suptitle("Stock Simulation")
-# plt.plot(TimeVector,price)
-# plt.xlabel('Time')
-# plt.ylabel('Stock Price')
-# plt.show()
+fig = plt.figure()
+fig.suptitle('kernel density estimate of distribution of exercise time')
+exercise_time = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000, boundary)[4]
+sns.set_style('whitegrid')
+sns.kdeplot(np.array(exercise_time[:,0]), bw_method = 0.05)
+plt.xlabel('Time to Maturity')
+plt.show()
 
 # Q3 Part(b) ii:
+volatility = np.arange(0.1, 0.31, 0.05)  
+# Compute the early exercise boundary whhen sigma = 20%
+early_bound = PutOption(10, 10, 0.02, 0.05, 0.2, 5000, 1)[2]
+# Generate plots for multiple volatilities with respect to profit and loss
+profit_loss = np.full((10000, 1), np.nan) 
+fig = plt.figure()
 
-
-
+for ii in range(len(volatility)):
+    profit_loss = Putsimulation(10, 10, 0.02, 0.2, volatility[ii], 5000, 1, 10000, early_bound)[3]
+    sns.kdeplot(np.array(profit_loss[:,0]), bw_method = 0.05, label = str(volatility[ii]))
+    
+fig.suptitle('kernel density estimate of profit and loss')
+plt.show()
+# Generate plots for multiple volatilities in terms of exercise time
+fig = plt.figure()
+exercise_time = np.full((10000, 1), np.nan)
+for ii in range(len(volatility)):
+    profit_loss = Putsimulation(10, 10, 0.02, 0.2, volatility[ii], 5000, 1, 10000, early_bound)[4]
+    sns.kdeplot(np.array(profit_loss[:,0]), bw_method = 0.05, label = str(volatility[ii]))
+    
+fig.suptitle('kernel density estimate of exercise time')
+plt.show()
 
 

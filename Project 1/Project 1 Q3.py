@@ -117,20 +117,23 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def Putsimulation(currStockPrice, strikePrice, intRate, divYield, vol, totSteps, yearsToExp, simulationStep):
+
+def Putsimulation(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, simulationStep):
     timeStep = yearsToExp/totSteps
     u = np.exp(vol * np.sqrt(timeStep))
     d = np.exp(-vol * np.sqrt(timeStep))
-    pu = (np.exp((intRate - divYield) * timeStep) - d) / (u - d)
+    pu = (np.exp(intRate * timeStep) - d) / (u - d)
     PriceTree = np.full((simulationStep, totSteps+1), np.nan)
     payoffTree = np.full_like(PriceTree, np.nan)
     OptionValueTree = np.full((simulationStep, totSteps+1), np.nan)
     # PL: profit and loss
-    PL = np.full((simulationStep, 1), np.nan)
+    PL = np.full((simulationStep, 1), np.nan) 
+    # Exercise time at which we would like to exercise the American put option
+    exercise_t = np.full((simulationStep, totSteps+1), np.nan) 
+    ex_t = np.full((simulationStep, 1), np.nan)
+    
     PriceTree[:,0] = currStockPrice
-    # For reproducing purpose
   
-
     for j in range(1, totSteps+1):
         # Set the probability of random term
         # Set the random numbers
@@ -144,29 +147,37 @@ def Putsimulation(currStockPrice, strikePrice, intRate, divYield, vol, totSteps,
     intrinsicValue = PutOption(10, 10, 0.02, 0, 0.2, 500, 1)[3]
     for i in range(0, totSteps+1):
         # Select the time at which we want to exercise the option, compare with the early exercise boundary
-        # the maximum value between payoff and intrinsic value
-        # Convert the price above the exercise boundary to zero
+        # Calculate the profit and loss: PV(payoff) - option price at t = 0 
         payoffTree[:,i] = np.where(PriceTree[:,i] < boundary[i],
-                                   (PriceTree[:,i] - strikePrice)*np.exp(-intRate * i*timeStep) - optionPrice, 0) 
+                                   (- PriceTree[:,i] + strikePrice)*np.exp(-intRate * i*timeStep) - optionPrice, -optionPrice) 
+        exercise_t[:,i] = np.where(PriceTree[:,i] < boundary[i], i, 0) 
         # Find the first exercise price in each path
         if i !=0:
-            payoffTree[:,i] = np.where(payoffTree[:,i-1] != 0,payoffTree[:,i-1],payoffTree[:,i])
-     
+            payoffTree[:,i] = np.where(payoffTree[:,i-1] != -optionPrice,payoffTree[:,i-1],payoffTree[:,i])
+            exercise_t[:,i] = np.where(exercise_t[:, i-1] != 0, exercise_t[:,i-1], exercise_t[:,i])
+            
+            
+    # Find the leftmost node on given conditions
+    for ii in range(0, simulationStep):
+        index = np.where(payoffTree[ii,:] != -optionPrice)
+        index2 = np.where(exercise_t[ii,:] != 0)
+        if np.array(index).size == 0:
+            PL[ii] = -optionPrice
+            ex_t[ii] = 0
+        else:
+            PL[ii] = payoffTree[ii, index[0][0]]
+            ex_t[ii] = exercise_t[ii, index[0][0]] * timeStep
+        
+        
     
-    
-   # for i in range(0, totSteps+1):
-        
-        
-        
-        
-        
-    
-    return PriceTree, OptionValueTree, payoffTree
+    return PriceTree, OptionValueTree, payoffTree, PL, ex_t
 
-price = np.transpose(Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000)[0])
-OptionValue = np.transpose(Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000)[1])
-payoff = Putsimulation(10, 10, 0.02, 0, 0.2, 5000, 1, 10000)[2]
+price = np.transpose(Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[0])
+OptionValue = np.transpose(Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[1])
+payoff = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[2]
 TimeVector = np.arange(0, 1+1/5000, 1/5000)
+PL = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[3]
+# Simulate 10000 sample paths of the asset
 fig = plt.figure()
 fig.suptitle("Stock Simulation")
 plt.plot(TimeVector,price)
@@ -175,16 +186,23 @@ plt.ylabel('Stock Price')
 plt.show()
 
 
+# Generate the kernel density estimate
+sns.set_style('whitegrid')
+sns.kdeplot(np.array(PL[:,0]), bw=0.5)
+plt.show()
 
-# Calculate the kernel density estimate of profit and loss you will receive
-
-# Generate the distribution
+# Generate the exercise distribution of function t 
+# !!! need to be fixed
+exercise_time = Putsimulation(10, 10, 0.02, 0.05, 0.2, 5000, 1, 10000)[4]
+plt.plot(exercise_time)
+# fig = plt.figure()
+# fig.suptitle("Stock Simulation")
+# plt.plot(TimeVector,price)
+# plt.xlabel('Time')
+# plt.ylabel('Stock Price')
+# plt.show()
 
 # Q3 Part(b) ii:
-
-
-
-
 
 
 

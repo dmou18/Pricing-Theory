@@ -75,7 +75,7 @@ def exerciseBoundary(currStockPrice, strikePrice, intRate, mu, vol, totSteps, ye
    
     
 # Q3 Part(a) ii: hedging strategy
-def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp):
+def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, plot = False):
     timeStep = yearsToExp/totSteps
     payoff, optionValueTree, priceTree, intrinsicTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
     u = np.exp(intRate * timeStep + vol * np.sqrt(timeStep))
@@ -126,19 +126,35 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
     portfolio_3 = np.reshape(portfolio_3, (-1,3))
     portfolio_4 = np.reshape(portfolio_4, (-1,3))
     
-    plt.plot(portfolio_0[:, 0], portfolio_0[:, 2], alpha=1, marker='o', markersize=6, label=r'$t = 0$')
-    plt.plot(portfolio_1[:, 0], portfolio_1[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
-    plt.plot(portfolio_2[:, 0], portfolio_2[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
-    plt.plot(portfolio_3[:, 0], portfolio_3[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
-    plt.plot(portfolio_4[:, 0], portfolio_4[:, 2], alpha=1, linewidth=2, label=r'$t = 1$')
-    
-    plt.title("Hedging Portfolio")
-    plt.xlabel("Stock Price")
-    plt.ylabel(r'$\alpha$')
-    plt.legend()
-    plt.show()
+    if plot:
+        f = plt.figure(1)
+        plt.plot(portfolio_0[:, 0], portfolio_0[:, 1], alpha=1, marker='o', markersize=6, label=r'$t = 0$')
+        plt.plot(portfolio_1[:, 0], portfolio_1[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
+        plt.plot(portfolio_2[:, 0], portfolio_2[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
+        plt.plot(portfolio_3[:, 0], portfolio_3[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
+        plt.plot(portfolio_4[:, 0], portfolio_4[:, 1], alpha=1, linewidth=2, label=r'$t = 1$')
+        
+        plt.title("Hedging Portfolio")
+        plt.xlabel("Stock Price")
+        plt.ylabel(r'$\alpha$')
+        plt.legend()
+        
+        g = plt.figure(2)
+        plt.plot(portfolio_0[:, 0], portfolio_0[:, 2], alpha=1, marker='o', markersize=6, label=r'$t = 0$')
+        plt.plot(portfolio_1[:, 0], portfolio_1[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
+        plt.plot(portfolio_2[:, 0], portfolio_2[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
+        plt.plot(portfolio_3[:, 0], portfolio_3[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
+        plt.plot(portfolio_4[:, 0], portfolio_4[:, 2], alpha=1, linewidth=2, label=r'$t = 1$')
+        
+        plt.title("Hedging Portfolio")
+        plt.xlabel("Stock Price")
+        plt.ylabel(r'$\beta$')
+        plt.legend()
+        plt.show()
+        
+    return portfolio_0, portfolio_1, portfolio_2, portfolio_3, portfolio_4
     
     
 if __name__ == "__main__":
     # exerciseBoundary(10, 10, 0.02, 0.05, 0.2, 5000, 1, True)
-    hedgePortfolio(10, 10, 0.02, 0.05, 0.2, 5000, 1)
+    hedgePortfolio(10, 10, 0.02, 0.05, 0.2, 5000, 1, True)

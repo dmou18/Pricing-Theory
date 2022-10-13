@@ -5,7 +5,7 @@ vol = []
 p = []
 for i in volatility:
     vol += [i]
-    p += [hedgePortfolio(10, 10, 0.02, 0.05, i, 5000, 1, True)]    
+    p += [hedgePortfolio(10, 10, 0.02, 0.05, i, 5000, 1, False)]    
 plt.plot(p,vol)
 plt.title("Calculated Price VS Volatility")
 plt.xlabel("Volatility")
@@ -17,7 +17,7 @@ r = []
 p = []
 for ii in risk_free:
     r += [ii]
-    p += [hedgePortfolio(10, 10, ii, 0.05, 0.2, 5000, 1, True)]  
+    p += [hedgePortfolio(10, 10, ii, 0.05, 0.2, 5000, 1, False)]  
 plt.plot(p,r)
 plt.title("Calculated Price VS Risk-Free Rate")
 plt.xlabel("Risk-Free Rate")

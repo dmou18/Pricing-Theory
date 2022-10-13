@@ -22,7 +22,7 @@ def PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yea
     pd = 1 - pu
     
     priceTree = np.full((totSteps+1, totSteps+1), np.nan)
-    intrinsicTree = np.full((totSteps+1, totSteps+1), np.nan)
+    euroOptionTree = np.full((totSteps+1, totSteps+1), np.nan)
     
     priceTree[0, 0] = currStockPrice
 
@@ -30,9 +30,9 @@ def PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yea
         priceTree[0:ii, ii] = priceTree[0:ii, (ii-1)] * u
         priceTree[ii, ii] = priceTree[(ii-1), (ii-1)] * d
 
-    optionValueTree = np.full_like(priceTree, np.nan)
-    optionValueTree[:, -1] = np.maximum(0, strikePrice - priceTree[:, -1])
-    intrinsicTree[:, -1] = np.maximum(0, strikePrice - priceTree[:, -1])
+    americanOptionTree = np.full_like(priceTree, np.nan)
+    americanOptionTree[:, -1] = np.maximum(0, strikePrice - priceTree[:, -1])
+    euroOptionTree[:, -1] = np.maximum(0, strikePrice - priceTree[:, -1])
     payoff = np.full_like(priceTree, np.nan)
     payoff[:,:] = np.maximum(0, strikePrice - priceTree[:,:])
 
@@ -41,22 +41,22 @@ def PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yea
     
     for ii in range(backSteps, 0, -1):
         B = np.exp(intRate * timeStep*ii)
-        optionValueTree[0:ii, ii-1] = B*oneStepDiscount *(pu * optionValueTree[0:ii, ii]/B + pd * optionValueTree[1:(ii+1), ii]/B)
-        intrinsicTree[0:ii, ii-1] =  B*oneStepDiscount *(pu * intrinsicTree[0:ii, ii]/B + pd * intrinsicTree[1:(ii+1), ii]/B)
-        optionValueTree[0:ii+1, ii] = np.maximum(strikePrice - priceTree[0:ii+1, ii], optionValueTree[0:ii+1, ii])
+        americanOptionTree[0:ii, ii-1] = B*oneStepDiscount *(pu * americanOptionTree[0:ii, ii]/B + pd * americanOptionTree[1:(ii+1), ii]/B)
+        euroOptionTree[0:ii, ii-1] =  B*oneStepDiscount *(pu * euroOptionTree[0:ii, ii]/B + pd * euroOptionTree[1:(ii+1), ii]/B)
+        americanOptionTree[0:ii+1, ii] = np.maximum(strikePrice - priceTree[0:ii+1, ii], americanOptionTree[0:ii+1, ii])
        
-    EuropValue = intrinsicTree[0,0]
-    AmericanValue = optionValueTree[0,0]
-    return payoff, optionValueTree, priceTree, intrinsicTree
+    EuropValue = euroOptionTree[0,0]
+    AmericanValue = americanOptionTree[0,0]
+    return payoff, americanOptionTree, priceTree, euroOptionTree
 
 
 # Q3 Part(a) Generate the exercise boundary as a function of t
 def exerciseBoundary(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, plot = False):
     timeStep = yearsToExp / totSteps
     TimeVector = np.arange(0, yearsToExp+timeStep, timeStep)
-    payoff, optionValueTree, priceTree, intrinsicTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
+    payoff, americanOptionTree, priceTree, euroOptionTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
     
-    diff = np.subtract(payoff, intrinsicTree)
+    diff = np.subtract(payoff, euroOptionTree)
     boundary = np.full((1+totSteps, 1), np.nan)
     
     for i in range(0, 1+totSteps):
@@ -75,14 +75,20 @@ def exerciseBoundary(currStockPrice, strikePrice, intRate, mu, vol, totSteps, ye
    
     
 # Q3 Part(a) ii: hedging strategy
-def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, plot = False):
+def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, american = False, plot = False):
     timeStep = yearsToExp/totSteps
-    payoff, optionValueTree, priceTree, intrinsicTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
+    payoff, americanOptionTree, priceTree, euroOptionTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
     u = np.exp(intRate * timeStep + vol * np.sqrt(timeStep))
     d = np.exp(intRate * timeStep - vol * np.sqrt(timeStep))
     alphas = np.full((totSteps+1, 5), np.nan)
     betas = np.full((totSteps+1, 5), np.nan)
     stocks = np.full((totSteps+1, 5),np.nan)
+    optionTree = np.full_like(americanOptionTree, np.nan)
+    
+    if american:
+        optionTree = americanOptionTree
+    else:
+        optionTree = euroOptionTree 
     
     for i in range(5):
         ind = int(totSteps * i * 0.25)
@@ -90,11 +96,11 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
         beta = None
         S = priceTree[0:ind+1, ind]
         if i == 4:
-            alpha = np.where(optionValueTree[:, ind] > 0, -1, 0)
-            beta = (optionValueTree[:, ind] - (S*alpha))/np.exp(intRate * timeStep * ind)
+            alpha = np.where(optionTree[:, ind] > 0, -1, 0)
+            beta = (optionTree[:, ind] - (S*alpha))/np.exp(intRate * timeStep * ind)
         else:
-            Cu = optionValueTree[0:ind+1, ind+1]
-            Cd = optionValueTree[1:ind+2, ind+1]
+            Cu = optionTree[0:ind+1, ind+1]
+            Cd = optionTree[1:ind+2, ind+1]
             alpha = (Cu-Cd)/(S*(u-d))
             beta = (Cu - alpha*S*u)/np.exp(intRate * timeStep * ind)
         
@@ -160,4 +166,4 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
     
 if __name__ == "__main__":
     # exerciseBoundary(10, 10, 0.02, 0.05, 0.2, 5000, 1, True)
-    hedgePortfolio(10, 10, 0.02, 0.05, 0.2, 5000, 1, True)
+    hedgePortfolio(10, 10, 0.02, 0.05, 0.2, 5000, 1, False, True)

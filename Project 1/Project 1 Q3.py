@@ -17,7 +17,7 @@ def PutOption(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToEx
     d = np.exp(intRate * timeStep - vol * np.sqrt(timeStep))
     
     # risk neutral probability of an up move
-    pu = (np.exp(intRate * timeStep) -d)/(u-d)
+    pu = (1 -d)/(u-d)
     # risk neutral probability of a down move
     pd = 1 - pu
    
@@ -46,7 +46,7 @@ def PutOption(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToEx
         B = np.exp(intRate * timeStep*ii)
         optionValueTree[0:ii, ii-1] = B*oneStepDiscount *(pu * optionValueTree[0:ii, ii]/B + pd * optionValueTree[1:(ii+1), ii]/B)
         intrinsicTree[0:ii, ii-1] =  B*oneStepDiscount *(pu * intrinsicTree[0:ii, ii]/B + pd * intrinsicTree[1:(ii+1), ii]/B)
-        optionValueTree[0:ii, ii] = np.maximum(strikePrice - priceTree[0:ii, ii], optionValueTree[0:ii, ii])
+        optionValueTree[0:ii+1, ii] = np.maximum(strikePrice - priceTree[0:ii+1, ii], optionValueTree[0:ii+1, ii])
     
     #Calculate the put option price for European style and American style    
     EuropValue = intrinsicTree[0,0]

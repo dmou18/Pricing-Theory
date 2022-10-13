@@ -2,8 +2,7 @@
 """
 Created on Tue Oct  4 21:47:06 2022
 
-@author: zhaiz
-@editor: Dixin Mou
+@author: zhaiz, Dixin Mou
 """
 from cmath import nan
 import pandas as pd
@@ -44,7 +43,7 @@ def PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yea
         B = np.exp(intRate * timeStep*ii)
         optionValueTree[0:ii, ii-1] = B*oneStepDiscount *(pu * optionValueTree[0:ii, ii]/B + pd * optionValueTree[1:(ii+1), ii]/B)
         intrinsicTree[0:ii, ii-1] =  B*oneStepDiscount *(pu * intrinsicTree[0:ii, ii]/B + pd * intrinsicTree[1:(ii+1), ii]/B)
-        optionValueTree[0:ii, ii] = np.maximum(strikePrice - priceTree[0:ii, ii], optionValueTree[0:ii, ii])
+        optionValueTree[0:ii+1, ii] = np.maximum(strikePrice - priceTree[0:ii+1, ii], optionValueTree[0:ii+1, ii])
        
     EuropValue = intrinsicTree[0,0]
     AmericanValue = optionValueTree[0,0]
@@ -73,8 +72,8 @@ def exerciseBoundary(currStockPrice, strikePrice, intRate, mu, vol, totSteps, ye
         plt.ylabel("Stock Price")
         plt.show()
     return TimeVector, boundary
+   
     
-
 # Q3 Part(a) ii: hedging strategy
 def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp):
     timeStep = yearsToExp/totSteps
@@ -85,8 +84,11 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
     betas = np.full((totSteps, 5), np.nan)
     stocks = np.full((totSteps, 5),np.nan)
     
-    for i in range(4):
+    for i in range(5):
         ind = int(totSteps * i * 0.25)
+        if i == 4:
+            ind -= 1
+        
         Cu = optionValueTree[0:ind+1, ind+1]
         Cd = optionValueTree[1:ind+2, ind+1]
         S = priceTree[0:ind+1, ind]
@@ -97,11 +99,12 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
         betas[0:ind + 1,i] = beta
         stocks[0 : ind + 1, i] = S
          
-    inds = np.argwhere(stocks <= 10)
+    inds = np.argwhere(stocks <= 20)
     portfolio_0 = []
     portfolio_1 = []
     portfolio_2 = []
     portfolio_3 = []
+    portfolio_4 = []
     
     for i in inds:
         x = i[0]
@@ -114,17 +117,20 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
             portfolio_2.append([stocks[x,y], alphas[x,y], betas[x,y]])
         elif y == 3:
             portfolio_3.append([stocks[x,y], alphas[x,y], betas[x,y]])
+        elif y == 4:
+            portfolio_4.append([stocks[x,y], alphas[x,y], betas[x,y]])
             
     portfolio_0 = np.reshape(portfolio_0, (-1,3))
     portfolio_1 = np.reshape(portfolio_1, (-1,3))
     portfolio_2 = np.reshape(portfolio_2, (-1,3))
     portfolio_3 = np.reshape(portfolio_3, (-1,3))
+    portfolio_4 = np.reshape(portfolio_4, (-1,3))
     
-    plt.plot(portfolio_0[:, 0], portfolio_0[:, 1], alpha=1, linewidth=2, label=r'$t = 0$')
-    plt.plot(portfolio_1[:, 0], portfolio_1[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
-    plt.plot(portfolio_2[:, 0], portfolio_2[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
-    plt.plot(portfolio_3[:, 0], portfolio_3[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
- #   plt.plot(portfolio_0[4], alphas[4], alpha=1, linewidth=2, label=r'$t = 1$')
+    plt.plot(portfolio_0[:, 0], portfolio_0[:, 2], alpha=1, marker='o', markersize=6, label=r'$t = 0$')
+    plt.plot(portfolio_1[:, 0], portfolio_1[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
+    plt.plot(portfolio_2[:, 0], portfolio_2[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
+    plt.plot(portfolio_3[:, 0], portfolio_3[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
+    plt.plot(portfolio_4[:, 0], portfolio_4[:, 2], alpha=1, linewidth=2, label=r'$t = 1$')
     
     plt.title("Hedging Portfolio")
     plt.xlabel("Stock Price")

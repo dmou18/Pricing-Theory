@@ -80,20 +80,23 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
     payoff, optionValueTree, priceTree, intrinsicTree = PutOptionPricer(currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp)
     u = np.exp(intRate * timeStep + vol * np.sqrt(timeStep))
     d = np.exp(intRate * timeStep - vol * np.sqrt(timeStep))
-    alphas = np.full((totSteps, 5), np.nan)
-    betas = np.full((totSteps, 5), np.nan)
-    stocks = np.full((totSteps, 5),np.nan)
+    alphas = np.full((totSteps+1, 5), np.nan)
+    betas = np.full((totSteps+1, 5), np.nan)
+    stocks = np.full((totSteps+1, 5),np.nan)
     
     for i in range(5):
         ind = int(totSteps * i * 0.25)
-        if i == 4:
-            ind -= 1
-        
-        Cu = optionValueTree[0:ind+1, ind+1]
-        Cd = optionValueTree[1:ind+2, ind+1]
+        alpha = None
+        beta = None
         S = priceTree[0:ind+1, ind]
-        alpha = (Cu-Cd)/(S*(u-d))
-        beta = (Cu - alpha*S*u)/np.exp(intRate * timeStep * (ind+1))
+        if i == 4:
+            alpha = np.where(optionValueTree[:, ind] > 0, -1, 0)
+            beta = (optionValueTree[:, ind] - (S*alpha))/np.exp(intRate * timeStep * ind)
+        else:
+            Cu = optionValueTree[0:ind+1, ind+1]
+            Cd = optionValueTree[1:ind+2, ind+1]
+            alpha = (Cu-Cd)/(S*(u-d))
+            beta = (Cu - alpha*S*u)/np.exp(intRate * timeStep * ind)
         
         alphas[0:ind + 1,i] = alpha
         betas[0:ind + 1,i] = beta

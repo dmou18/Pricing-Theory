@@ -182,7 +182,6 @@ plt.show()
 # Generate the kernel density estimate
 fig = plt.figure()
 fig.suptitle('kernel density estimate of profit and loss')
-sns.set_style('whitegrid')
 sns.kdeplot(np.array(PL[:,0]),bw_method = 0.05)
 plt.xlabel('Profit and loss')
 plt.show()
@@ -204,7 +203,7 @@ data = np.full((10000, 1), np.nan)
 fig = plt.figure()
 for ii in range(len(volatility)):
     data = Putsimulation(10, 10, 0.02, 0.05, volatility[ii], 5000, 1, 10000, early_bound)[3]
-    sns.kdeplot(np.array(data[:,0]), bw_method = 0.05, label = 'vol =' + str(volatility[ii]))
+    sns.kdeplot(np.array(data[:,0]), bw_method = 0.05, label = 'vol =' + str(int(volatility[ii]*100 )) + '%')
     
 fig.suptitle('kernel density estimate of profit and loss')
 plt.legend()
@@ -214,10 +213,10 @@ fig = plt.figure()
 exercise_time = np.full((10000, 1), np.nan)
 for ii in range(len(volatility)):
     data = Putsimulation(10, 10, 0.02, 0.05, volatility[ii], 5000, 1, 10000, early_bound)[4]
-    sns.kdeplot(np.array(data[:,0]), bw_method = 0.05, label = 'vol =' + str(volatility[ii]))
-    
+    sns.kdeplot(np.array(data[:,0]), bw_method = 0.05, linewidth = 0.7, label = 'vol =' + str(int(volatility[ii]*100 )) + '%')
+      
 fig.suptitle('kernel density estimate of exercise time')
+plt.ylim(0,20)
 plt.legend()
 plt.show()
-
 

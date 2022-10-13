@@ -131,7 +131,7 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
     
     if plot:
         f = plt.figure(1)
-        plt.plot(portfolio_0[:, 0], portfolio_0[:, 1], alpha=1, marker='o', markersize=6, label=r'$t = 0$')
+        plt.scatter(portfolio_0[:, 0], portfolio_0[:, 1], alpha=1, marker='o', linewidth=3, label=r'$t = 0$')
         plt.plot(portfolio_1[:, 0], portfolio_1[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
         plt.plot(portfolio_2[:, 0], portfolio_2[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
         plt.plot(portfolio_3[:, 0], portfolio_3[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
@@ -143,7 +143,7 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
         plt.legend()
         
         g = plt.figure(2)
-        plt.plot(portfolio_0[:, 0], portfolio_0[:, 2], alpha=1, marker='o', markersize=6, label=r'$t = 0$')
+        plt.scatter(portfolio_0[:, 0], portfolio_0[:, 2], alpha=1, marker='o', linewidth=3, label=r'$t = 0$')
         plt.plot(portfolio_1[:, 0], portfolio_1[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{4}$')
         plt.plot(portfolio_2[:, 0], portfolio_2[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{1}{2}$')
         plt.plot(portfolio_3[:, 0], portfolio_3[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')

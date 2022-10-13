@@ -143,7 +143,10 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
         plt.plot(portfolio_3[:, 0], portfolio_3[:, 1], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
         plt.plot(portfolio_4[:, 0], portfolio_4[:, 1], alpha=1, linewidth=2, label=r'$t = 1$')
         
-        plt.title("Hedging Position for the Underlying Asset in Various Time")
+        if american:
+            plt.title("Hedging Position for the Underlying Asset in Various Time - American Put")
+        else:
+            plt.title("Hedging Position for the Underlying Asset in Various Time - European Put")
         plt.xlabel("Stock Price")
         plt.ylabel(r'$\alpha$')
         plt.legend()
@@ -155,7 +158,10 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
         plt.plot(portfolio_3[:, 0], portfolio_3[:, 2], alpha=1, linewidth=2, label=r'$t = \frac{3}{4}$')
         plt.plot(portfolio_4[:, 0], portfolio_4[:, 2], alpha=1, linewidth=2, label=r'$t = 1$')
         
-        plt.title("Hedging Position for the Numeraire in Various Time")
+        if american:
+            plt.title("Hedging Position for the Numeraire in Various Time - American Put")
+        else:
+            plt.title("Hedging Position for the Numeraire in Various Time - European Put")  
         plt.xlabel("Stock Price")
         plt.ylabel(r'$\beta$')
         plt.legend()
@@ -166,4 +172,4 @@ def hedgePortfolio(currStockPrice, strikePrice, intRate, mu, vol, totSteps, year
     
 if __name__ == "__main__":
     # exerciseBoundary(10, 10, 0.02, 0.05, 0.2, 5000, 1, True)
-    hedgePortfolio(10, 10, 0.02, 0.05, 0.2, 5000, 1, False, True)
+    hedgePortfolio(10, 10, 0.02, 0.05, 0.2, 5000, 1, True, True)

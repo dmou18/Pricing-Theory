@@ -136,9 +136,9 @@ def Q3_iii_boundary_vol(currStockPrice, strikePrice, intRate, vol_list, totSteps
     TimeVector = np.arange(0, yearsToExp + timeStep, timeStep)
     fig = plt.figure(1)
     fig.suptitle("Exercise Boundary for Differenct Volatility")
-    for v in vol_list:
-        americanOptionTree, euroOptionTree, priceTree, boundary = PutOptionPricer(currStockPrice, strikePrice, intRate, v, totSteps, yearsToExp)
-        label = r'$\sigma=$'+str(v)
+    for vol in vol_list:
+        americanOptionTree, euroOptionTree, priceTree, boundary = PutOptionPricer(currStockPrice, strikePrice, intRate, vol, totSteps, yearsToExp)
+        label = r'$\sigma=$'+str(vol)
         plt.plot(TimeVector, boundary, label=label)
     plt.xlabel("Time")
     plt.ylabel("Stock Price")
@@ -165,7 +165,7 @@ def Q3_iii_boundary_r(currStockPrice, strikePrice, intRate_list, vol, totSteps, 
 def Q3_iii_portfolio_vol(currStockPrice, strikePrice, intRate, vol_list, totSteps, yearsToExp):
     fig = plt.figure(1)
     fig.suptitle("Position for Underlying Assets with Differenct Volatility")
-    for vol in [0.1, 0.15, 0.2, 0.25, 0.3]:
+    for vol in vol_list:
         americanOptionTree, euroOptionTree, priceTree, boundary = PutOptionPricer(currStockPrice, strikePrice, intRate, vol, totSteps, yearsToExp)
         alphas, betas, stocks = hedgePortfolio(americanOptionTree, priceTree, intRate, vol, totSteps, yearsToExp, True)
         label = r'$\sigma=$'+str(vol)
@@ -177,11 +177,10 @@ def Q3_iii_portfolio_vol(currStockPrice, strikePrice, intRate, vol_list, totStep
     
     fig = plt.figure(2)
     fig.suptitle("Position for Numeraire Assets with Differenct Volatility")
-    for v in vol_list:
-        vol = v
-        americanOptionTree, euroOptionTree, priceTree, boundary = PutOptionPricer(currStockPrice, strikePrice, intRate, v, totSteps, yearsToExp)
+    for vol in vol_list:
+        americanOptionTree, euroOptionTree, priceTree, boundary = PutOptionPricer(currStockPrice, strikePrice, intRate, vol, totSteps, yearsToExp)
         alphas, betas, stocks = hedgePortfolio(americanOptionTree, priceTree, intRate, vol, totSteps, yearsToExp, True)
-        label = r'$\sigma=$'+str(v)
+        label = r'$\sigma=$'+str(vol)
         plt.plot(stocks[:,2], betas[:,2], label=label)
     plt.xlim(0,25)
     plt.xlabel("Stock Price")
@@ -268,8 +267,9 @@ def Q3_b_iii(optionPrice,currStockPrice, strikePrice, intRate, mu, vol_list, tot
     fig = plt.figure(1)
     for ii in range(len(vol_list)):
         data = putSimulation(optionPrice, currStockPrice, strikePrice, intRate, mu, vol_list[ii], totSteps, yearsToExp, simulationStep, early_boundary)[1]
-        sns.kdeplot(np.array(data), bw_method = 0.05, label = r'$\sigma$=' + str(int(vol_list[ii]*100 )) + '%')    
+        sns.kdeplot(np.array(data), bw_method = 0.05, linewidth = 0.7, label = r'$\sigma$=' + str(int(vol_list[ii]*100 )) + '%')    
     fig.suptitle('Kernel Density Estimate of Profit and Loss')
+    plt.xlabel('Profit and Loss')
     plt.legend()
     
     # Generate plots for multiple volatilities in terms of exercise time
@@ -279,6 +279,7 @@ def Q3_b_iii(optionPrice,currStockPrice, strikePrice, intRate, mu, vol_list, tot
         sns.kdeplot(np.array(data), bw_method = 0.05, linewidth = 0.7, label = r'$\sigma$=' + str(int(vol_list[ii]*100 )) + '%')
     fig.suptitle('Kernel Density Estimate of Exercise Time')
     plt.ylim(0,30)
+    plt.xlabel('Time to Maturity')
     plt.legend()
     plt.show()
 
@@ -294,15 +295,15 @@ if __name__ == "__main__":
     simulationStep = 10000
     times = [0, 0.25, 0.5, 0.75, 1]
     vol_list = [0.1, 0.15, 0.2, 0.25, 0.3]
-    intRate_list = [0.01, 0.05, 0.1, 0.13, 0.15]
+    intRate_list = [0.1, 0.2, 0.3, 0.4, 0.5]
     
-    #americanOptionTree, euroOptionTree, priceTree, boundary = PutOptionPricer(currStockPrice, strikePrice, intRate, vol, totSteps, yearsToExp)
+    americanOptionTree, euroOptionTree, priceTree, boundary = PutOptionPricer(currStockPrice, strikePrice, intRate, vol, totSteps, yearsToExp)
     
     ''' Exercise Boundary '''
     #pltBoundary(boundary, totSteps, yearsToExp) 
     
     ''' Hedging Portfolio '''
-    #alphas, betas, stocks=hedgePortfolio(americanOptionTree, priceTree, intRate, vol, totSteps, yearsToExp, True, True)
+    #alphas, betas, stocks=hedgePortfolio(euroOptionTree, priceTree, intRate, vol, totSteps, yearsToExp, False, True)
 
     '''Various intRate and vol'''
     #Q3_iii_boundary_vol(currStockPrice, strikePrice, intRate, vol_list, totSteps, yearsToExp)
@@ -314,4 +315,4 @@ if __name__ == "__main__":
     #priceTree, pl_list, ex_t = putSimulation(americanOptionTree[0,0],currStockPrice, strikePrice, intRate, mu, vol, totSteps, yearsToExp, simulationStep, boundary, plot = True)
     
     '''Distributions of profit and loss and exercise time vary in Sigma'''
-    #Q3_b_iii(americanOptionTree[0,0],currStockPrice, strikePrice, intRate, mu, vol_list, totSteps, yearsToExp, simulationStep, boundary)
+    Q3_b_iii(americanOptionTree[0,0],currStockPrice, strikePrice, intRate, mu, vol_list, totSteps, yearsToExp, simulationStep, boundary)

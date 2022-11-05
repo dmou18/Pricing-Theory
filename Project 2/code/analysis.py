@@ -3,6 +3,7 @@ from scipy.stats import norm
 import matplotlib.pyplot as plt
 import pdb
 import seaborn as sns
+from dynamic_hedging import Dynamic_Hedging 
 
 class Analysis():
     def PlotDeltaHedging(spotPrice, Nsteps, T, delta, bankAccount, lazyDelta, lazyBankAccount):
@@ -127,12 +128,12 @@ class Analysis():
         plt.show()
         
         
-    def HistPL(portfolio, title):
+    def HistPnL(portfolio, title):
         #plt.hist(portfolio, edgecolor='black', linewidth=1.2)
         sns.distplot(portfolio, bins = 50)
         plt.title(title)
         plt.xlabel('Portfolio Value')
-        plt.ylabel('Frenquency')
+        plt.ylabel('Density')
         # plt.xlim(-2, 2)
         #plt.ylim(0,1.4)
         plt.show()
@@ -153,7 +154,21 @@ class Analysis():
         adjustedPrice = optionPrice + premium
         
         return CVaR, adjustedPrice
-        
-
     
-
+    def EfficientFrontier(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth_list, settle):
+        n = len(bandwidth_list)
+        mean_list = np.full(n, np.nan)
+        std_list = np.full(n, np.nan)
+        for i in range(n):
+            bandwidth = bandwidth_list[i]
+            alpha, gamma, callOption, putOption, bankAccount = Dynamic_Hedging.MoveBasedDeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth, settle)
+            portfolio = Analysis.deltaGammaPort(spotPrice, alpha, gamma, callOption, bankAccount, settle)
+            mean_list[i] = portfolio.mean()
+            std_list[i] = portfolio.std()
+            
+        plt.plot(std_list, mean_list)
+        plt.xlabel("Standard Deviation of Portfolio")
+        plt.ylabel("Mean of Portfolio")
+        plt.title("Efficient Frontier of Delta-Gamma Hedging with Various Bandwidth")
+        plt.show()
+            

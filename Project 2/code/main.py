@@ -25,13 +25,15 @@ if __name__ == "__main__":
     K = 100
     S_0 = 100
     bandwidth = 0.05
+    bandwidth_list = np.linspace(0, 0.1, 20)
     c_level = 0.1
     benchmark = -0.02
     
-    new_sim = False
     settle = True
-    
     spotPrice = None
+    
+    # Start a new simulation if new_sim is true
+    new_sim = False
     if new_sim:
         spotPrice = BS.SimStock(Nsims, Nsteps, dt, S_0, mu, sigma)
         with open("stock_sim.csv","w+") as my_csv:
@@ -50,31 +52,34 @@ if __name__ == "__main__":
     
     # portfolio = Analysis.deltaPort(spotPrice, delta, bankAccount, settle)
     # Analysis.plotPort(K, spotPrice[:,-1], portfolio, 'Portfolio Value before Settlement Time-based Delta Hedging', is_call = False)
-    # Analysis.HistPL(portfolio, "P&L Distribution for Time-based Delta Hedging")
+    # Analysis.HistPnL(portfolio, "P&L Distribution for Time-based Delta Hedging")
     # Analysis.HistTrades(numTrades, "Number of Unit of Underlying Asset Traded for Time-based Delta Hedging")
     
     # lazyPortfolio = Analysis.deltaPort(spotPrice, lazyDelta, lazyBankAccount, settle)
     # Analysis.plotPort(K, spotPrice[:,-1], lazyPortfolio, 'Portfolio Value before Settlement for Move-based Delta Hedging', is_call = False)
-    # Analysis.HistPL(lazyPortfolio, "P&L Distribution for Move-based Delta Hedging")
+    # Analysis.HistPnL(lazyPortfolio, "P&L Distribution for Move-based Delta Hedging")
     # Analysis.HistTrades(lazyNumTrades, "Number of Unit of Underlying Asset Traded for Move-based Delta Hedging")
     
     ''' Anaylysis for Delta-Gamma Hedging '''
-    alpha, gamma, callOption, putOption, bankAccount = Dynamic_Hedging.DeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, settle)
-    lazyAlpha, lazyGamma, lazyCallOption, lazyPutOption, lazyBankAccount = Dynamic_Hedging.MoveBasedDeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth, settle)
+    # alpha, gamma, callOption, putOption, bankAccount = Dynamic_Hedging.DeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, settle)
+    # lazyAlpha, lazyGamma, lazyCallOption, lazyPutOption, lazyBankAccount = Dynamic_Hedging.MoveBasedDeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth, settle)
     
     # Analysis.PlotDeltaGammaHedging(spotPrice, Nsteps, T1, alpha, gamma, bankAccount, lazyAlpha, lazyGamma, lazyBankAccount)
     
-    portfolio = Analysis.deltaGammaPort(spotPrice, alpha, gamma, callOption, bankAccount, settle)
+    # portfolio = Analysis.deltaGammaPort(spotPrice, alpha, gamma, callOption, bankAccount, settle)
     # Analysis.plotPort(K, spotPrice[:,-1], portfolio, 'Portfolio Value before Settlement for Time-based Delta-Gamma Hedging', is_call = False)
-    # Analysis.HistPL(portfolio, 'P&L Distribution for Time-based Delta-Gamma Hedging')
+    # Analysis.HistPnL(portfolio, 'P&L Distribution for Time-based Delta-Gamma Hedging')
     
     # lazyPortfolio = Analysis.deltaGammaPort(spotPrice, lazyAlpha, lazyGamma, lazyCallOption, lazyBankAccount, settle)
     # Analysis.plotPort(K, spotPrice[:,-1], lazyPortfolio, 'Portfolio Value before Settlement for Move-based Delta-Gamma Hedging', is_call = False)
-    # Analysis.HistPL(lazyPortfolio, 'P&L Distribution for Move-based Delta-Gamma Hedging')
+    # Analysis.HistPnL(lazyPortfolio, 'P&L Distribution for Move-based Delta-Gamma Hedging')
     
     '''Calculate CVar'''
-    CVaR, adjusted_price = Analysis.CVaR(portfolio, putOption[0,0], c_level, benchmark, r, T1)
-    print(f"The CVaR for the portfolio at VaR level {c_level} is no larger than {benchmark} is {CVaR}")
-    print(f"The Adjusted put option price so CVaR at VaR level {c_level} is no larger than {benchmark} is {adjusted_price}")
+    # CVaR, adjusted_price = Analysis.CVaR(portfolio, putOption[0,0], c_level, benchmark, r, T1)
+    # print(f"The CVaR for the portfolio at VaR level {c_level} is no larger than {benchmark} is {CVaR}")
+    # print(f"The Adjusted put option price so CVaR at VaR level {c_level} is no larger than {benchmark} is {adjusted_price}")
+    
+    '''Efficeient Frontier for Different Bandwidth'''
+    Analysis.EfficientFrontier(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth_list, settle)
 
  # %%

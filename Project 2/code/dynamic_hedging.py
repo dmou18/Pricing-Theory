@@ -46,11 +46,11 @@ class Dynamic_Hedging():
         
         for i in range(1, Nsteps+1):
             lazyDelta[:,i] = lazyDelta[:,i-1]
-            update_indx = np.any([delta[:,i] > uband, delta[:,i] < lband], axis=0)
-            lazyDelta[:,i][update_indx] = delta[:,i][update_indx]
             
+            update_index = np.any([delta[:,i] > uband, delta[:,i] < lband], axis=0)
+            lazyDelta[:,i][update_index] = delta[:,i][update_index]
             
-            uband[update_indx] = delta[:,i][update_indx] + bandwidth
+            uband[update_index] = delta[:,i][update_index] + bandwidth
             lband = uband - 2*bandwidth
             
             uband[uband > -0.01] = -0.01
@@ -137,13 +137,16 @@ class Dynamic_Hedging():
         for i in range(1, Nsteps+1):
             lazyAlpha[:,i] = lazyAlpha[:,i-1]
             lazyGamma[:,i] = lazyGamma[:,i-1]
-            update_index = np.any([putDelta[:,i] > uband, putDelta[:,i] < lband], axis=0)
+            
+            update_index1 = np.any([putDelta[:,i] > uband, putDelta[:,i] < lband], axis=0)
+            update_index2 = np.any([putDelta[:,i-1] < -0.01, putDelta[:,i] > -0.99], axis=0)
+            update_index = np.all([update_index1, update_index2], axis=0)
+            
             lazyAlpha[:,i][update_index] = alpha[:,i][update_index]
             lazyGamma[:,i][update_index] = gamma[:,i][update_index]
             
             uband[update_index] = putDelta[:,i][update_index] + bandwidth
             lband = uband - 2*bandwidth
-            
             uband[uband > -0.01] = -0.01
             lband[lband < -0.99] = -0.99
     

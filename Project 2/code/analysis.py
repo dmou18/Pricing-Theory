@@ -134,8 +134,9 @@ class Analysis():
         plt.xlabel('Portfolio Value')
         plt.ylabel('Frenquency')
         # plt.xlim(-2, 2)
-        plt.ylim(0,1.4)
+        #plt.ylim(0,1.4)
         plt.show()
+        
         
     def HistTrades(numTrades, title):
         plt.hist(numTrades, bins=20, edgecolor='black', linewidth=1.2)
@@ -145,6 +146,14 @@ class Analysis():
         plt.show()
         
     
+    def CVaR(portfolio, optionPrice, c_level, benchmark, r, T):
+        VaR = np.percentile(portfolio, c_level)
+        CVaR = np.mean(portfolio[portfolio<=VaR])
+        premium = (benchmark - CVaR)*np.exp(-r*T)
+        adjustedPrice = optionPrice + premium
+        
+        return CVaR, adjustedPrice
+        
 
     
 

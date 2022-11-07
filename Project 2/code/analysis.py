@@ -132,7 +132,7 @@ class Analysis():
         #plt.hist(portfolio, edgecolor='black', linewidth=1.2)
         sns.distplot(portfolio, bins = 50)
         plt.title(title)
-        plt.xlabel('Portfolio Value')
+        plt.xlabel('Profit & Loss')
         plt.ylabel('Density')
         # plt.xlim(-2, 2)
         #plt.ylim(0,1.4)
@@ -147,13 +147,35 @@ class Analysis():
         plt.show()
         
     
-    def CVaR(portfolio, optionPrice, c_level, benchmark, r, T):
-        VaR = np.percentile(portfolio, c_level)
+    def CVaR(portfolio, optionPrice, c_level, benchmark, r, T, plot=False):
+        VaR = np.quantile(portfolio, c_level)
         CVaR = np.mean(portfolio[portfolio<=VaR])
         premium = (benchmark - CVaR)*np.exp(-r*T)
         adjustedPrice = optionPrice + premium
         
+        print(f"The unadjusted option price according to the Delta-Gamma hedging is {optionPrice}")
+        print(f"The VaR for the portfolio at level {c_level} is {VaR}")
+        print(f"The CVaR for the portfolio at VaR level {c_level} is {CVaR}")
+        print(f"The Adjusted put option price so CVaR at VaR level {c_level} is no smaller than {benchmark} is {adjustedPrice}")
+        
+        if plot:
+            ax = sns.distplot(portfolio, bins = 50)
+            line = ax.get_lines()[-1]
+            x, y = line.get_data()
+            x, y = x[x<=VaR], y[x<=VaR]
+            ax.fill_between(x, y1=y, alpha=0.5, facecolor='red')
+            
+            plt.title("Profit and Loss with Conditional Value at Risk")
+            plt.xlabel('Profit & Loss')
+            plt.ylabel('Density')
+            plt.axvline(x=VaR, ls='--', color='purple', label = f"VaR Level")
+            plt.axvline(x=benchmark, ls='--', color = 'teal', label=f"Benchmark CVaR Loss")
+            plt.axvline(x=CVaR, ls='--', color = 'black', label=f"Conditional VaR")
+            
+            plt.legend()
+            plt.show()
         return CVaR, adjustedPrice
+    
     
     def EfficientFrontier(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth_list, settle):
         n = len(bandwidth_list)

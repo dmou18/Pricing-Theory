@@ -18,6 +18,7 @@ class BS():
         
         return sim_paths
     
+
     def CallPrice(S, T, K, sigma, r):
         
         dp = (np.log(S/K) + (r+0.5*sigma**2)*T)/(np.sqrt(T)*sigma)

@@ -13,7 +13,7 @@ class Dynamic_Hedging():
         bankAccount = np.full_like(spotPrice, np.nan)
         compounding = np.exp(r*dt)
         
-        bankAccount[:, 0] = optionPrice[:, 0] - delta[:, 0]*spotPrice[:, 0] - np.abs(delta[:, 0])*transCost
+        bankAccount[:,0] = optionPrice[:,0] - delta[:, 0]*spotPrice[:,0] - np.abs(delta[:,0])*transCost
         
         for i in range(1, Nsteps):
             bankAccount[:,i] = bankAccount[:,i-1]*compounding - (delta[:,i]-delta[:,i-1])*spotPrice[:,i] - np.abs(delta[:,i]-delta[:,i-1])*transCost
@@ -41,10 +41,14 @@ class Dynamic_Hedging():
         
         uband = delta[:,0] + bandwidth
         lband = uband - 2*bandwidth
-        uband[uband > -0.01] = -0.01
-        lband[lband < -0.99] = -0.99
+        u = delta[:,0]>-0.01
+        d = delta[:,0]<-0.99
+        uband[u] = 0 
+        lband[u] = -0.01
+        uband[d] = -0.99
+        lband[d] = -1
         
-        for i in range(1, Nsteps+1):
+        for i in range(1, Nsteps):
             lazyDelta[:,i] = lazyDelta[:,i-1]
             
             update_index = np.any([delta[:,i] > uband, delta[:,i] < lband], axis=0)
@@ -53,13 +57,12 @@ class Dynamic_Hedging():
             uband[update_index] = delta[:,i][update_index] + bandwidth
             lband = uband - 2*bandwidth
             
-            uband[uband > -0.01] = -0.01
-            lband[lband < -0.99] = -0.99
-             
-            temp = lazyDelta[:,i]
-            temp[temp > -0.01] = -0.01
-            temp[temp < -0.99] = -0.99
-            lazyDelta[:,i] = temp
+            u = delta[:,i]>-0.01
+            d = delta[:,i]<-0.99
+            uband[u] = 0 
+            lband[u] = -0.01
+            uband[d] = -0.99
+            uband[d] = -1
             
             numTrades += np.abs(lazyDelta[:,i]-lazyDelta[:,i-1])
             
@@ -131,24 +134,32 @@ class Dynamic_Hedging():
         
         uband = putDelta[:,0]+bandwidth
         lband = uband-2*bandwidth
-        uband[uband > -0.01] = -0.01
-        lband[lband < -0.99] = -0.99
         
-        for i in range(1, Nsteps+1):
+        u = putDelta[:,0]>-0.01
+        d = putDelta[:,0]<-0.99
+        uband[u] = 0 
+        lband[u] = -0.01
+        uband[d] = -0.99
+        lband[d] = -1
+        
+        for i in range(1, Nsteps):
             lazyAlpha[:,i] = lazyAlpha[:,i-1]
             lazyGamma[:,i] = lazyGamma[:,i-1]
             
-            update_index1 = np.any([putDelta[:,i] > uband, putDelta[:,i] < lband], axis=0)
-            update_index2 = np.any([putDelta[:,i-1] < -0.01, putDelta[:,i-1] > -0.99], axis=0)
-            update_index = np.all([update_index1, update_index2], axis=0)
+            update_index = np.any([putDelta[:,i] > uband, putDelta[:,i] < lband], axis=0)
             
             lazyAlpha[:,i][update_index] = alpha[:,i][update_index]
             lazyGamma[:,i][update_index] = gamma[:,i][update_index]
             
             uband[update_index] = putDelta[:,i][update_index] + bandwidth
             lband = uband - 2*bandwidth
-            uband[uband > -0.01] = -0.01
-            lband[lband < -0.99] = -0.99
+            
+            u = putDelta[:,i]>-0.01
+            d = putDelta[:,i]<-0.99
+            uband[u] = 0 
+            lband[u] = -0.01
+            uband[d] = -0.99
+            uband[d] = -1
     
         bankAccount[:,0] = putOption[:, 0]-lazyAlpha[:, 0]*spotPrice[:, 0]-np.abs(lazyAlpha[:, 0])*equityTransCost\
             -lazyGamma[:,0]*callOption[:,0] - np.abs(lazyGamma[:,0])*optTransCost

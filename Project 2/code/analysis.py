@@ -138,6 +138,16 @@ class Analysis():
         #plt.ylim(0,1.4)
         plt.show()
         
+    
+    def HistPnL_2 (portfolio1, portfolio2, label1, label2, title):
+        sns.distplot(portfolio1, bins = 50, label=label1)
+        sns.distplot(portfolio2, bins = 50, label=label2)
+        plt.title(title)
+        plt.xlabel('Profit & Loss')
+        plt.ylabel('Density')
+        plt.legend()
+        plt.show()
+        
         
     def HistTrades(numTrades, title):
         plt.hist(numTrades, bins=20, edgecolor='black', linewidth=1.2)

@@ -61,6 +61,8 @@ if __name__ == "__main__":
     # Analysis.HistPnL(lazyPortfolio, "P&L Distribution for Move-based Delta Hedging")
     # Analysis.HistTrades(lazyNumTrades, "Number of Unit of Underlying Asset Traded for Move-based Delta Hedging")
     
+    # Analysis.HistPnL_2(portfolio1=portfolio, portfolio2=lazyPortfolio, label1="Time-based", label2="Move-based", title='P&L Distribution for Delta-Gamma Hedging')
+    
     ''' Anaylysis for Delta-Gamma Hedging '''
     # alpha, gamma, callOption, putOption, bankAccount = Dynamic_Hedging.DeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, settle)
     # portfolio = Analysis.deltaGammaPort(spotPrice, alpha, gamma, callOption, bankAccount, settle)
@@ -68,7 +70,7 @@ if __name__ == "__main__":
     # lazyAlpha, lazyGamma, lazyCallOption, lazyPutOption, lazyBankAccount = Dynamic_Hedging.MoveBasedDeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth, settle)
     # lazyPortfolio = Analysis.deltaGammaPort(spotPrice, lazyAlpha, lazyGamma, lazyCallOption, lazyBankAccount, settle)
     
-    #Analysis.PlotDeltaGammaHedging(spotPrice, Nsteps, T1, alpha, gamma, bankAccount, lazyAlpha, lazyGamma, lazyBankAccount)
+    # Analysis.PlotDeltaGammaHedging(spotPrice, Nsteps, T1, alpha, gamma, bankAccount, lazyAlpha, lazyGamma, lazyBankAccount)
     
     # Analysis.plotPort(K, spotPrice[:,-1], portfolio, 'Portfolio Value before Settlement for Time-based Delta-Gamma Hedging', is_call = False)
     # Analysis.HistPnL(portfolio, 'P&L Distribution for Time-based Delta-Gamma Hedging')
@@ -76,17 +78,20 @@ if __name__ == "__main__":
     # Analysis.plotPort(K, spotPrice[:,-1], lazyPortfolio, 'Portfolio Value before Settlement for Move-based Delta-Gamma Hedging', is_call = False)
     # Analysis.HistPnL(lazyPortfolio, 'P&L Distribution for Move-based Delta-Gamma Hedging')
     
+    Analysis.HistPnL_2(portfolio1=portfolio, portfolio2=lazyPortfolio, label1="Time-based", label2="Move-based", title='P&L Distribution for Delta-Gamma Hedging')
+    
+    
     '''Calculate CVar'''
     # plot = False
     # portfolio = portfolio
-    # optionPrice = option[0,0]
+    # optionPrice = putOption[0,0]
     
     # print("\nCVaR-adjusted option price for Time-based hedging portfolio:")
     # Analysis.CVaR(portfolio, optionPrice, c_level, benchmark, r, T1, plot)
     
     # print("\nCVaR-adjusted option price for Move-based hedging portfolio:")
     # lazyPortfolio = lazyPortfolio
-    # lazyOptionPrice = lazyOption[0,0]
+    # lazyOptionPrice = lazyPutOption[0,0]
     # Analysis.CVaR(lazyPortfolio, lazyOptionPrice, c_level, benchmark, r, T1, plot)
     
     '''Efficeient Frontier for Different Bandwidth'''

@@ -187,7 +187,42 @@ class Analysis():
         return CVaR, adjustedPrice
     
     
-    def EfficientFrontier(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth_list, settle):
+    def EfficientFrontier(spotPrice, Nsteps, T, dt, K, sigma, r, transCost, bandwidth_list, settle):
+        n = len(bandwidth_list)
+        mean_list = np.full(n, np.nan)
+        std_list = np.full(n, np.nan)
+        
+        for i in range(n):
+            bandwidth = bandwidth_list[i]
+            delta, bankAccount, optionPrice, numTrades = Dynamic_Hedging.MoveBasedDeltaHedging(spotPrice, Nsteps, T, dt, K, sigma, r, transCost, bandwidth, settle)
+            portfolio =  Analysis.deltaPort(spotPrice, delta, bankAccount, settle)
+            mean_list[i] = portfolio.mean()
+            std_list[i] = portfolio.std()
+        
+        fig = plt.figure(1)
+        fig.suptitle('Mean Return of Portflio v.s. Bandwidth')
+        plt.xlabel("Bandwidth")
+        plt.ylabel("Mean P&L of Portfolio")
+        plt.plot(bandwidth_list*2, mean_list)        
+        
+        fig = plt.figure(2)
+        fig.suptitle('Standard Deviation of Portflio v.s. Bandwidth')
+        plt.xlabel("Bandwidth")
+        plt.ylabel("Standard Deviation")
+        plt.plot(bandwidth_list*2, std_list)  
+        
+        fig = plt.figure(3)
+        fig.suptitle("Efficient Frontier for Delta Hedging with Various Bandwidth")
+        plt.plot(std_list, mean_list)
+        plt.xlabel("Standard Deviation of Portfolio")
+        plt.ylabel("Mean P&L of Portfolio")
+          
+        plt.show()
+        
+        return mean_list, std_list
+            
+            
+    def EfficientFrontier_DG(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth_list, settle):
         n = len(bandwidth_list)
         mean_list = np.full(n, np.nan)
         std_list = np.full(n, np.nan)
@@ -198,9 +233,24 @@ class Analysis():
             mean_list[i] = portfolio.mean()
             std_list[i] = portfolio.std()
             
+        fig = plt.figure(1)
+        fig.suptitle('Mean Return of Portflio v.s. Bandwidth')
+        plt.xlabel("Bandwidth")
+        plt.ylabel("Mean P&L of Portfolio")
+        plt.plot(bandwidth_list*2, mean_list)        
+        
+        fig = plt.figure(2)
+        fig.suptitle('Standard Deviation of Portflio v.s. Bandwidth')
+        plt.xlabel("Bandwidth")
+        plt.ylabel("Standard Deviation")
+        plt.plot(bandwidth_list*2, std_list)  
+        
+        fig = plt.figure(3)
+        fig.suptitle("Efficient Frontier for Delta-Gamma Hedging with Various Bandwidth")
         plt.plot(std_list, mean_list)
         plt.xlabel("Standard Deviation of Portfolio")
-        plt.ylabel("Mean of Portfolio")
-        plt.title("Efficient Frontier of Delta-Gamma Hedging with Various Bandwidth")
+        plt.ylabel("Mean P&L of Portfolio")
+          
         plt.show()
-            
+        
+        return mean_list, std_list

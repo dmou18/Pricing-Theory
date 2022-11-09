@@ -63,7 +63,7 @@ class Dynamic_Hedging():
             
             numTrades += np.abs(lazyDelta[:,i]-lazyDelta[:,i-1])
             
-        bankAccount[:, 0] = optionPrice[:, 0]-delta[:, 0]*spotPrice[:, 0]-np.abs(delta[:,0])*transCost
+        bankAccount[:, 0] = optionPrice[:,0]-delta[:,0]*spotPrice[:,0]-np.abs(delta[:,0])*transCost
         for i in range(1, Nsteps):
             bankAccount[:,i] = bankAccount[:, i-1]*compounding - (lazyDelta[:,i]-lazyDelta[:,i-1])*spotPrice[:,i] - np.abs(lazyDelta[:,i]-lazyDelta[:,i-1])*transCost
         

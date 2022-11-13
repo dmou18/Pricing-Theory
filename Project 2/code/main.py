@@ -20,7 +20,7 @@ if __name__ == "__main__":
     T2 = 0.5
     dt = 1/360
     Nsteps = int(T1/dt)
-    Nsims = 10000
+    Nsims = 10
     mu = 0.1
     sigma = 0.2
     r = 0.02
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     c_level = 0.1
     benchmark = -0.02
     
-    settle = True
+    settle = False
     
     # Start a new simulation if new_sim is true
     np.random.seed(89)
@@ -59,13 +59,13 @@ if __name__ == "__main__":
     
     
     ''' Anaylysis for Delta-Gamma Hedging '''
-    # alpha, gamma, callOption, putOption, bankAccount = Dynamic_Hedging.DeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, settle)
-    # portfolio = Analysis.deltaGammaPort(spotPrice, alpha, gamma, callOption, bankAccount, settle)
+    alpha, gamma, callOption, putOption, bankAccount = Dynamic_Hedging.DeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, settle)
+    portfolio = Analysis.deltaGammaPort(spotPrice, alpha, gamma, callOption, bankAccount, settle)
     
-    # lazyAlpha, lazyGamma, lazyCallOption, lazyPutOption, lazyBankAccount = Dynamic_Hedging.MoveBasedDeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth, settle)
-    # lazyPortfolio = Analysis.deltaGammaPort(spotPrice, lazyAlpha, lazyGamma, lazyCallOption, lazyBankAccount, settle)
+    lazyAlpha, lazyGamma, lazyCallOption, lazyPutOption, lazyBankAccount = Dynamic_Hedging.MoveBasedDeltaGammaHedging(spotPrice, Nsteps, T1, T2, dt, K, sigma, r, equityTransCost, optTransCost, bandwidth, settle)
+    lazyPortfolio = Analysis.deltaGammaPort(spotPrice, lazyAlpha, lazyGamma, lazyCallOption, lazyBankAccount, settle)
     
-    # Analysis.PlotDeltaGammaHedging(spotPrice, Nsteps, T1, alpha, gamma, bankAccount, lazyAlpha, lazyGamma, lazyBankAccount)
+    Analysis.PlotDeltaGammaHedging(spotPrice, Nsteps, T1, alpha, gamma, bankAccount, lazyAlpha, lazyGamma, lazyBankAccount)
     
     # Analysis.plotPort(K, spotPrice[:,-1], portfolio, 'Portfolio Value before Settlement for Time-based Delta-Gamma Hedging', is_call = False)
     # Analysis.HistPnL(portfolio, 'P&L Distribution for Time-based Delta-Gamma Hedging')
@@ -79,14 +79,14 @@ if __name__ == "__main__":
     '''Calculate CVar'''
     # plot = True
     # portfolio = portfolio
-    # optionPrice = putOption[0,0]
+    # optionPrice = option[0,0]
     
     # print("\nCVaR-adjusted option price for Time-based hedging portfolio:")
     # Analysis.CVaR(portfolio, optionPrice, c_level, benchmark, r, T1, plot)
     
     # print("\nCVaR-adjusted option price for Move-based hedging portfolio:")
     # lazyPortfolio = lazyPortfolio
-    # lazyOptionPrice = lazyPutOption[0,0]
+    # lazyOptionPrice = option[0,0]
     # Analysis.CVaR(lazyPortfolio, lazyOptionPrice, c_level, benchmark, r, T1, plot)
     
     

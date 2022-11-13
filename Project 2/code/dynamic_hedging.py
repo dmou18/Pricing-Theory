@@ -23,8 +23,10 @@ class Dynamic_Hedging():
             payoff = np.maximum(K-spotPrice[:,-1],0)
             bankAccount[:,-1] = bankAccount[:,-2]*compounding - payoff + delta[:,-2]*spotPrice[:,-1] - np.abs(delta[:,-2])*transCost
             numTrades += np.abs(delta[:,-2])
+            delta[:,-1] = 0
         else:
             bankAccount[:,-1] = bankAccount[:,-2]*compounding
+            delta[:,-1] = delta[:,-2]
         return delta, bankAccount, optionPrice, numTrades
     
     
@@ -42,7 +44,7 @@ class Dynamic_Hedging():
         uband = delta[:,0] + bandwidth
         lband = uband - 2*bandwidth
         
-        for i in range(1, Nsteps):
+        for i in range(1, Nsteps+1):
             lazyDelta[:,i] = lazyDelta[:,i-1]
             
             update_index = np.any([delta[:,i] > uband, delta[:,i] < lband], axis=0)
@@ -70,9 +72,11 @@ class Dynamic_Hedging():
         if settle:
             payoff = np.maximum(K-spotPrice[:,-1],0)
             bankAccount[:,-1] = bankAccount[:,-2]*compounding - payoff + lazyDelta[:,-2]*spotPrice[:,-1] - np.abs(lazyDelta[:,-2])*transCost
+            lazyDelta[:,-1] = 0
             numTrades += np.abs(delta[:,-2])
         else:
             bankAccount[:,-1] = bankAccount[:,-2]*compounding
+            lazyDelta[:,-1] = lazyDelta[:,-2]
         
         return lazyDelta, bankAccount, optionPrice, numTrades      
     
@@ -102,8 +106,12 @@ class Dynamic_Hedging():
             putPayoff = np.maximum(K-spotPrice[:,-1],0)
             bankAccount[:,-1] = bankAccount[:,-2]*compounding - putPayoff + alpha[:,-2]*spotPrice[:,-1] \
                 - np.abs(alpha[:,-2])*equityTransCost + gamma[:,-2]*callOption[:,-1] - np.abs(gamma[:,-2])*optTransCost
+            alpha[:,-1] = 0
+            gamma[:,-1] = 0
         else:
             bankAccount[:,-1] = bankAccount[:,-2]*compounding
+            alpha[:,-1] = alpha[:,-2]
+            gamma[:,-1] = gamma[:,-2]
             
         return alpha, gamma, callOption, putOption, bankAccount
     
@@ -121,7 +129,7 @@ class Dynamic_Hedging():
         bankAccount = np.full_like(spotPrice, np.nan)
         compounding = np.exp(r*dt)
         
-        gamma = putGamma/callGamma
+        gamma =  putGamma/callGamma
         alpha = putDelta - gamma*callDelta
         lazyAlpha = np.full_like(alpha, np.nan)
         lazyGamma = np.full_like(gamma, np.nan)
@@ -132,7 +140,7 @@ class Dynamic_Hedging():
         uband = putDelta[:,0]+bandwidth
         lband = uband-2*bandwidth
         
-        for i in range(1, Nsteps):
+        for i in range(1, Nsteps+1):
             lazyAlpha[:,i] = lazyAlpha[:,i-1]
             lazyGamma[:,i] = lazyGamma[:,i-1]
             
@@ -166,7 +174,11 @@ class Dynamic_Hedging():
             putPayoff = np.maximum(K-spotPrice[:,-1],0)
             bankAccount[:,-1] = bankAccount[:,-2]*compounding - putPayoff + lazyAlpha[:,-2]*spotPrice[:,-1] \
                 + lazyGamma[:,-2]*callOption[:,-1] - np.abs(lazyAlpha[:,-2])*equityTransCost - np.abs(lazyGamma[:,-2])*optTransCost
+            lazyAlpha[:,-1] = 0
+            lazyGamma[:,-1] = 0
         else:
             bankAccount[:,-1] = bankAccount[:,-2]*compounding 
+            lazyAlpha[:,-1] = lazyAlpha[:,-2]
+            lazyGamma[:,-1] = lazyGamma[:,-2]
             
         return lazyAlpha, lazyGamma, callOption, putOption, bankAccount 
